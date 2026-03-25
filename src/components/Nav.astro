@@ -1,0 +1,49 @@
+---
+const navLinks = [
+  { label: 'Projects', href: '#projects' },
+  { label: 'Experience', href: '#experience' },
+  { label: 'Club Work', href: '#club-work' },
+  { label: 'Contact', href: '#contact' },
+];
+---
+
+<header
+  id="nav"
+  class="fixed top-0 left-0 right-0 z-50 border-b border-border/50 backdrop-blur-sm"
+  style="background: rgba(15,15,15,0.85);"
+>
+  <nav class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+    <!-- Wordmark / monogram -->
+    <a
+      href="#"
+      class="font-mono text-sm font-medium tracking-widest text-text-primary hover:text-red-guards transition-colors duration-200 uppercase"
+    >
+      <!-- Replace with your initials or name -->
+      YN
+    </a>
+
+    <!-- Desktop nav links -->
+    <ul class="hidden md:flex items-center gap-8">
+      {navLinks.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class="font-mono text-xs tracking-widest uppercase text-text-secondary hover:text-text-primary transition-colors duration-200"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Mobile menu toggle (visual only — enhance with JS if needed) -->
+    <button
+      class="md:hidden flex flex-col gap-1.5 p-1 group"
+      aria-label="Open menu"
+    >
+      <span class="block w-5 h-px bg-text-secondary group-hover:bg-text-primary transition-colors"></span>
+      <span class="block w-5 h-px bg-text-secondary group-hover:bg-text-primary transition-colors"></span>
+      <span class="block w-3 h-px bg-red-guards"></span>
+    </button>
+  </nav>
+</header>

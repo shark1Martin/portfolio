@@ -1,0 +1,77 @@
+---
+export type ProjectStatus = 'Shipped' | 'In Progress' | 'Concept';
+
+interface Props {
+  name: string;
+  description: string;
+  stack: string[];
+  status: ProjectStatus;
+  href?: string;
+}
+
+const { name, description, stack, status, href } = Astro.props;
+
+const statusConfig: Record<ProjectStatus, { label: string; color: string }> = {
+  Shipped: {
+    label: 'Shipped',
+    color: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
+  },
+  'In Progress': {
+    label: 'In Progress',
+    color: 'text-amber-400 border-amber-400/30 bg-amber-400/5',
+  },
+  Concept: {
+    label: 'Concept',
+    color: 'text-text-muted border-border bg-transparent',
+  },
+};
+
+const { label, color } = statusConfig[status];
+---
+
+<article
+  class="group relative bg-surface border border-border p-6 flex flex-col gap-5 hover:border-red-guards/50 transition-all duration-300 hover:-translate-y-0.5"
+>
+  <!-- Top row: name + status -->
+  <div class="flex items-start justify-between gap-4">
+    <h3 class="text-base font-semibold text-text-primary leading-tight">
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-red-guards transition-colors"
+        >
+          {name}
+        </a>
+      ) : (
+        name
+      )}
+    </h3>
+
+    <span
+      class={`shrink-0 font-mono text-2xs tracking-widest uppercase px-2 py-1 border ${color}`}
+    >
+      {label}
+    </span>
+  </div>
+
+  <!-- Description -->
+  <p class="text-sm text-text-secondary leading-relaxed flex-1">
+    {description}
+  </p>
+
+  <!-- Tech stack -->
+  <ul class="flex flex-wrap gap-2">
+    {stack.map((tech) => (
+      <li>
+        <span class="font-mono text-2xs tracking-wide text-text-muted bg-surface-2 px-2 py-1">
+          {tech}
+        </span>
+      </li>
+    ))}
+  </ul>
+
+  <!-- Bottom accent line on hover -->
+  <div class="absolute bottom-0 left-0 right-0 h-px bg-red-guards scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+</article>

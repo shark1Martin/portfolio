@@ -1,0 +1,79 @@
+---
+// Fill in your details below
+const name = 'Your Name';
+const title = 'Your Title / Role';
+const tagline = 'A short, sharp tagline about what drives your work.';
+
+// Optional: a few at-a-glance stats or descriptor tags shown below the tagline
+const descriptors = [
+  'Builder',
+  'Designer',
+  'Engineer',
+];
+---
+
+<section
+  id="hero"
+  class="relative min-h-screen flex flex-col justify-center px-6 pt-14 overflow-hidden"
+>
+  <!-- Subtle background grid -->
+  <div
+    class="absolute inset-0 pointer-events-none opacity-[0.03]"
+    style="background-image: linear-gradient(#f5f5f5 1px, transparent 1px), linear-gradient(90deg, #f5f5f5 1px, transparent 1px); background-size: 40px 40px;"
+  ></div>
+
+  <!-- Red vertical accent line (far left) -->
+  <div class="absolute left-0 top-0 bottom-0 w-[3px] bg-red-guards opacity-60"></div>
+
+  <div class="max-w-6xl mx-auto w-full relative z-10">
+    <!-- Status indicator -->
+    <p class="section-label mb-8 flex items-center gap-3">
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-guards animate-pulse"></span>
+      Available for opportunities
+    </p>
+
+    <!-- Name -->
+    <h1
+      class="text-5xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-text-primary leading-none mb-4"
+    >
+      {name}
+    </h1>
+
+    <!-- Title -->
+    <p
+      class="text-xl sm:text-2xl font-light text-text-secondary tracking-wide mb-8"
+    >
+      {title}
+    </p>
+
+    <!-- Divider -->
+    <div class="flex items-center gap-4 mb-8">
+      <div class="h-px w-16 bg-red-guards"></div>
+      <div class="h-px flex-1 max-w-xs bg-border"></div>
+    </div>
+
+    <!-- Tagline -->
+    <p
+      class="text-base sm:text-lg text-text-secondary max-w-xl leading-relaxed mb-12"
+    >
+      {tagline}
+    </p>
+
+    <!-- Descriptor tags -->
+    <ul class="flex flex-wrap gap-3">
+      {descriptors.map((d) => (
+        <li>
+          <span class="font-mono text-2xs tracking-widest uppercase px-3 py-1.5 border border-border text-text-muted">
+            {d}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
+    <span class="font-mono text-2xs tracking-widest uppercase text-text-muted">Scroll</span>
+    <div class="w-px h-8 bg-text-muted"></div>
+  </div>
+</section>

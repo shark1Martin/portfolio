@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-background: #0f0f0f;
+  --color-surface: #1a1a1a;
+  --color-surface-2: #242424;
+  --color-border: #2a2a2a;
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #999999;
+  --color-text-muted: #555555;
+  --color-red-guards: #B00000;
+  --color-red-guards-dim: #7a0000;
+  --color-red-guards-glow: #d40000;
+
+  /* Fonts */
+  --font-sans: 'Inter', 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  /* Custom text size */
+  --text-2xs: 0.65rem;
+  --text-2xs--line-height: 1rem;
+
+  /* Custom animation */
+  --animate-fade-up: fadeUp 0.6s ease forwards;
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Thin scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0f0f0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B00000;
+}
+
+/* Section label shared utility */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #B00000;
+}
+
+/* Red left-border section heading */
+.section-heading {
+  border-left: 3px solid #B00000;
+  padding-left: 1rem;
+}

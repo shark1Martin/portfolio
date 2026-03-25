@@ -1,0 +1,53 @@
+---
+import ProjectCard from './ProjectCard.astro';
+import type { ProjectStatus } from './ProjectCard.astro';
+
+// ── Add your projects here ──────────────────────────────────────────────────
+const projects: {
+  name: string;
+  description: string;
+  stack: string[];
+  status: ProjectStatus;
+  href?: string;
+}[] = [
+  {
+    name: 'Project Alpha',
+    description: 'A short description of what this project does and why it matters. Replace with your actual project details.',
+    stack: ['TypeScript', 'React', 'Node.js'],
+    status: 'Shipped',
+    href: '#',
+  },
+  {
+    name: 'Project Beta',
+    description: 'A short description of what this project does and why it matters. Replace with your actual project details.',
+    stack: ['Python', 'FastAPI', 'PostgreSQL'],
+    status: 'In Progress',
+  },
+  {
+    name: 'Project Gamma',
+    description: 'A short description of what this project does and why it matters. Replace with your actual project details.',
+    stack: ['Rust', 'WebAssembly'],
+    status: 'Concept',
+  },
+];
+// ────────────────────────────────────────────────────────────────────────────
+---
+
+<section id="projects" class="py-24 px-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- Section header -->
+    <div class="mb-14">
+      <p class="section-label mb-4">01 — Projects</p>
+      <h2 class="section-heading text-3xl sm:text-4xl font-semibold tracking-tight text-text-primary">
+        Selected Work
+      </h2>
+    </div>
+
+    <!-- Project grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {projects.map((project) => (
+        <ProjectCard {...project} />
+      ))}
+    </div>
+  </div>
+</section>
