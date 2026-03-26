@@ -1,36 +1,15 @@
 ---
+import { getCollection } from 'astro:content';
 import ProjectCard from './ProjectCard.astro';
-import type { ProjectStatus } from './ProjectCard.astro';
+import ProjectModal from './ProjectModal.astro';
 
-// ── Add your projects here ──────────────────────────────────────────────────
-const projects: {
-  name: string;
-  description: string;
-  stack: string[];
-  status: ProjectStatus;
-  href?: string;
-}[] = [
-  {
-    name: 'Project Alpha',
-    description: 'A short description of what this project does and why it matters. Replace with your actual project details.',
-    stack: ['TypeScript', 'React', 'Node.js'],
-    status: 'Shipped',
-    href: '#',
-  },
-  {
-    name: 'Project Beta',
-    description: 'A short description of what this project does and why it matters. Replace with your actual project details.',
-    stack: ['Python', 'FastAPI', 'PostgreSQL'],
-    status: 'In Progress',
-  },
-  {
-    name: 'Project Gamma',
-    description: 'A short description of what this project does and why it matters. Replace with your actual project details.',
-    stack: ['Rust', 'WebAssembly'],
-    status: 'Concept',
-  },
+const projects = await getCollection('projects');
+
+// Show featured first, then by filename order
+const sorted = [
+  ...projects.filter((p) => p.data.featured),
+  ...projects.filter((p) => !p.data.featured),
 ];
-// ────────────────────────────────────────────────────────────────────────────
 ---
 
 <section id="projects" class="py-24 px-6">
@@ -45,9 +24,47 @@ const projects: {
 
     <!-- Project grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {projects.map((project) => (
-        <ProjectCard {...project} />
+      {sorted.map((project) => (
+        <ProjectCard
+          id={project.id}
+          name={project.data.name}
+          description={project.data.description}
+          stack={project.data.stack}
+          status={project.data.status}
+        />
       ))}
     </div>
   </div>
 </section>
+
+<!-- Modals rendered at section level (outside the grid) -->
+{sorted.map((project) => (
+  <ProjectModal project={project} />
+))}
+
+<script>
+  // Open modal
+  document.querySelectorAll<HTMLButtonElement>('[data-open-modal]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-open-modal');
+      const dialog = document.getElementById(id!) as HTMLDialogElement | null;
+      dialog?.showModal();
+    });
+  });
+
+  // Close via × button
+  document.querySelectorAll<HTMLButtonElement>('[data-close-modal]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const dialog = btn.closest('dialog') as HTMLDialogElement | null;
+      dialog?.close();
+    });
+  });
+
+  // Close on backdrop click
+  document.querySelectorAll('dialog.modal-dialog').forEach((el) => {
+    const dialog = el as HTMLDialogElement;
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+  });
+</script>
