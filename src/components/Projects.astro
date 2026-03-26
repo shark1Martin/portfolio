@@ -43,10 +43,12 @@ const sorted = [
 ))}
 
 <script>
-  // Open modal
-  document.querySelectorAll<HTMLButtonElement>('[data-open-modal]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = btn.getAttribute('data-open-modal');
+  // Open modal when clicking anywhere on a card
+  document.querySelectorAll<HTMLElement>('[data-open-modal]').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      // Don't open modal if the Full Page link was clicked
+      if ((e.target as Element).closest('[data-full-page]')) return;
+      const id = el.getAttribute('data-open-modal');
       const dialog = document.getElementById(id!) as HTMLDialogElement | null;
       dialog?.showModal();
     });
@@ -60,7 +62,7 @@ const sorted = [
     });
   });
 
-  // Close on backdrop click
+  // Close when clicking the backdrop (the dialog element itself, outside the inner panel)
   document.querySelectorAll('dialog.modal-dialog').forEach((el) => {
     const dialog = el as HTMLDialogElement;
     dialog.addEventListener('click', (e) => {

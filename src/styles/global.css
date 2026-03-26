@@ -67,23 +67,45 @@
 }
 
 /* ── Modal dialog ──────────────────────────────────────────────────────────── */
-dialog.modal-dialog {
-  margin: auto;
-  border-radius: 0;
-  outline: none;
-  position: fixed;
-}
 
-dialog.modal-dialog::backdrop {
+/*
+  The dialog fills the full viewport and acts as its own backdrop.
+  Clicking the dark transparent area hits the dialog element directly,
+  making e.target === dialog reliable for outside-click detection.
+*/
+dialog.modal-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 1.5rem;
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(4px);
+  border: none;
+  outline: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
 dialog.modal-dialog[open] {
+  display: flex;
   animation: dialogIn 0.2s ease forwards;
 }
 
 @keyframes dialogIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-panel {
+  animation: panelIn 0.2s ease forwards;
+}
+
+@keyframes panelIn {
   from { opacity: 0; transform: translateY(12px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
