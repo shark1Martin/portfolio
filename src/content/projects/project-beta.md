@@ -6,6 +6,7 @@ status: "In Progress"
 github: "https://github.com/yourusername/project-beta"
 year: "2025"
 featured: false
+visible: false
 ---
 
 ## Overview

@@ -5,7 +5,8 @@ import Nav from '../../components/Nav.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
-  return projects.map((project) => ({
+  const visibleProjects = projects.filter((project) => project.data.visible);
+  return visibleProjects.map((project) => ({
     params: { slug: project.id },
     props: { project },
   }));

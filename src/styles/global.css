@@ -2,16 +2,16 @@
 
 @theme {
   /* Colors */
-  --color-background: #0f0f0f;
-  --color-surface: #1a1a1a;
-  --color-surface-2: #242424;
-  --color-border: #2a2a2a;
-  --color-text-primary: #f5f5f5;
-  --color-text-secondary: #999999;
-  --color-text-muted: #555555;
-  --color-red-guards: #B00000;
-  --color-red-guards-dim: #7a0000;
-  --color-red-guards-glow: #d40000;
+  --color-background: #0d0f12;
+  --color-surface: #161a21;
+  --color-surface-2: #1f2530;
+  --color-border: #313948;
+  --color-text-primary: #f7f9fc;
+  --color-text-secondary: #c2c9d4;
+  --color-text-muted: #8c95a3;
+  --color-red-guards: #d10b0b;
+  --color-red-guards-dim: #8f0505;
+  --color-red-guards-glow: #ff2a2a;
 
   /* Fonts */
   --font-sans: 'Inter', 'DM Sans', system-ui, sans-serif;
@@ -41,28 +41,29 @@
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f0f0f;
+  background: #0d0f12;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: #313948;
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B00000;
+  background: #d10b0b;
 }
 
 /* Section label shared utility */
 .section-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.15;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: #B00000;
+  color: #d10b0b;
 }
 
 /* Red left-border section heading */
 .section-heading {
-  border-left: 3px solid #B00000;
+  border-left: 3px solid #d10b0b;
   padding-left: 1rem;
 }
 
@@ -82,8 +83,8 @@ dialog.modal-dialog {
   max-height: 100%;
   margin: 0;
   padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(2px);
   border: none;
   outline: none;
   display: none;
@@ -112,25 +113,25 @@ dialog.modal-dialog[open] {
 
 /* ── Prose (markdown content) ──────────────────────────────────────────────── */
 .prose {
-  color: #999999;
-  font-size: 0.9375rem;
-  line-height: 1.75;
+  color: #c2c9d4;
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
 .prose h2 {
   font-size: 1.125rem;
-  font-weight: 600;
-  color: #f5f5f5;
+  font-weight: 650;
+  color: #f7f9fc;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
   padding-left: 0.75rem;
-  border-left: 2px solid #B00000;
+  border-left: 2px solid #d10b0b;
 }
 
 .prose h3 {
   font-size: 0.9375rem;
-  font-weight: 600;
-  color: #f5f5f5;
+  font-weight: 650;
+  color: #f7f9fc;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
 }
@@ -161,7 +162,7 @@ dialog.modal-dialog[open] {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #B00000;
+  background: #d10b0b;
   margin-top: 0.6rem;
   flex-shrink: 0;
 }
@@ -172,26 +173,26 @@ dialog.modal-dialog[open] {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  color: #999999;
+  color: #c2c9d4;
 }
 
 .prose strong {
-  color: #f5f5f5;
+  color: #f7f9fc;
   font-weight: 600;
 }
 
 .prose code {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8125rem;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: #161a21;
+  border: 1px solid #313948;
   padding: 0.1em 0.4em;
-  color: #f5f5f5;
+  color: #f7f9fc;
 }
 
 .prose pre {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: #161a21;
+  border: 1px solid #313948;
   padding: 1rem 1.25rem;
   overflow-x: auto;
   margin-bottom: 1rem;
@@ -204,18 +205,18 @@ dialog.modal-dialog[open] {
 }
 
 .prose a {
-  color: #B00000;
+  color: #d10b0b;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .prose a:hover {
-  color: #d40000;
+  color: #ff2a2a;
 }
 
 .prose blockquote {
-  border-left: 2px solid #2a2a2a;
+  border-left: 2px solid #313948;
   padding-left: 1rem;
-  color: #555555;
+  color: #8c95a3;
   margin: 1.25rem 0;
 }

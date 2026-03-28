@@ -4,11 +4,12 @@ import ProjectCard from './ProjectCard.astro';
 import ProjectModal from './ProjectModal.astro';
 
 const projects = await getCollection('projects');
+const visibleProjects = projects.filter((p) => p.data.visible);
 
 // Show featured first, then by filename order
 const sorted = [
-  ...projects.filter((p) => p.data.featured),
-  ...projects.filter((p) => !p.data.featured),
+  ...visibleProjects.filter((p) => p.data.featured),
+  ...visibleProjects.filter((p) => !p.data.featured),
 ];
 ---
 
