@@ -5,6 +5,7 @@ stack: ["Rust", "WebAssembly"]
 status: "Concept"
 year: "2025"
 featured: false
+visible: false
 ---
 
 ## Overview
