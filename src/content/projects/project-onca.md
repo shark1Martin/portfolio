@@ -1,6 +1,6 @@
 ---
 name: "Project ONCA"
-description: "A B2B business that provides an AI-powered delegation call system, so that business owners can focus on building, rather that sustaining."
+description: "A B2B endeavour that that aims to provide an AI-powered call delegation system, so that business owners can focus on building, rather than operating."
 stack: ["Python", "React", "Bland AI"]
 status: "In Progress"
 # github: "https://github.com/yourusername/project-alpha"
@@ -17,14 +17,14 @@ visible: true
 <!-- Replace this with a detailed overview of the project. What is it? Who is it for? What problem does it solve? -->
 
 ONCA is an AI delegation system, which is fully automated. The purpose of this application is to outsource your calls with customers.
-If you don't want to continuously answer calls at the front-desk ONCA is a great solution for you. 
+If you don't want to continuously answer calls at the front-desk, ONCA is a great solution for you. 
 We will deploy our human-like AI agent to answer, note-down, and book any meetings for you regarding your business, without having any employee-intervention.
 
 ## The Problem
 
 <!-- Describe the problem or opportunity you were addressing. What made you decide to build this? -->
 
-Businesses tend to close at 5pm. No one is at the frontdesk at 5pm. But our AI agent is always on-call. 24/7. 
+Businesses tend to close at 5pm. No one is at the frontdesk at 5pm. But our AI agent is always on-call. 24/7. Or do you want to send outbound calls but have no time? 
 
 ## What I Built
 

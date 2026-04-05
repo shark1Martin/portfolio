@@ -1,4 +1,6 @@
 ---
+import StackBadge from './StackBadge.astro';
+
 export type ProjectStatus = 'Shipped' | 'In Progress' | 'Concept';
 
 interface Props {
@@ -43,9 +45,7 @@ const { color } = statusConfig[status];
     <ul class="flex flex-wrap gap-2">
       {stack.map((tech) => (
         <li>
-          <span class="font-mono text-2xs tracking-wide text-text-muted bg-surface-2 px-2 py-1">
-            {tech}
-          </span>
+          <StackBadge tech={tech} variant="card" />
         </li>
       ))}
     </ul>

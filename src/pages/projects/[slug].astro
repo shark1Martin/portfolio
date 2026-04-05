@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
+import StackBadge from '../../components/StackBadge.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -69,9 +70,7 @@ const { color } = statusConfig[status];
         <ul class="flex flex-wrap gap-2 mb-8">
           {stack.map((tech) => (
             <li>
-              <span class="font-mono text-xs tracking-wide text-text-muted bg-surface border border-border px-3 py-1.5">
-                {tech}
-              </span>
+              <StackBadge tech={tech} variant="page" />
             </li>
           ))}
         </ul>

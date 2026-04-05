@@ -1,6 +1,7 @@
 ---
 import { render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import StackBadge from './StackBadge.astro';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -60,9 +61,7 @@ const { color } = statusConfig[status];
       <ul class="flex flex-wrap gap-2">
         {stack.map((tech) => (
           <li>
-            <span class="font-mono text-2xs tracking-wide text-text-muted bg-surface-2 border border-border px-2 py-1">
-              {tech}
-            </span>
+            <StackBadge tech={tech} variant="modal" />
           </li>
         ))}
       </ul>
