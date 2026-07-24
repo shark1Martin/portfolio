@@ -32,7 +32,20 @@ create policy "public can update the file"
   with check (id = 1);
 
 -- 2. Realtime: lets open tabs see updates from other visitors live.
-alter publication supabase_realtime add table public.secret_file;
+--    Guarded so re-running this script doesn't abort here (a bare ALTER
+--    PUBLICATION ... ADD TABLE errors on the second run and would skip
+--    everything below it, including the storage bucket + policies).
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'secret_file'
+  ) then
+    alter publication supabase_realtime add table public.secret_file;
+  end if;
+end $$;
 
 -- 3. Storage bucket for the uploaded file. Public bucket so reads don't
 --    need a policy. No mime allowlist — accepts (almost) any file type.
