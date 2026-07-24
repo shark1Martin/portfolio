@@ -47,9 +47,14 @@ begin
   end if;
 end $$;
 
--- 3. Storage bucket for the uploaded file. Public bucket so reads don't
---    need a policy. No mime allowlist — accepts (almost) any file type.
---    20MB cap; raise file_size_limit if you need bigger files.
+-- 3. Storage bucket for the uploaded file. No mime allowlist — accepts
+--    (almost) any file type. 20MB cap; raise file_size_limit if you need
+--    bigger files. The SELECT policy below isn't for public downloads
+--    (those go through the public bucket's CDN path and bypass RLS) —
+--    it's required so upload(..., { upsert: true }) can look up whether
+--    an object already exists before deciding to insert or update it.
+--    Without it, overwriting an existing upload fails with a row-level
+--    security error even though the INSERT/UPDATE policies look correct.
 insert into storage.buckets (id, name, public, file_size_limit)
 values (
   'secret-files',
@@ -60,6 +65,12 @@ values (
 on conflict (id) do update set
   public = excluded.public,
   file_size_limit = excluded.file_size_limit;
+
+drop policy if exists "public can read secret-files objects" on storage.objects;
+create policy "public can read secret-files objects"
+  on storage.objects for select
+  to anon
+  using (bucket_id = 'secret-files');
 
 drop policy if exists "public can upload to secret-files" on storage.objects;
 create policy "public can upload to secret-files"
