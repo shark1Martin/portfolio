@@ -1,0 +1,180 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Martin Makaveev" description="Site pageview stats." noindex>
+  <main class="min-h-screen px-6 py-24">
+    <div class="w-full max-w-4xl mx-auto">
+      <div class="mb-8">
+        <p class="section-label mb-3">Site Pulse</p>
+        <h1 class="text-2xl font-semibold text-text-primary mb-2">Pageviews</h1>
+        <p class="text-sm text-text-muted">
+          Self-hosted visit counter
+        </p>
+      </div>
+
+      <div
+        id="config-warning"
+        class="hidden mb-6 border border-red-guards-dim bg-red-guards-dim/10 text-text-secondary text-sm p-4 font-mono"
+      >
+        Supabase isn't configured — set <code>PUBLIC_SUPABASE_URL</code> and
+        <code>PUBLIC_SUPABASE_ANON_KEY</code> to enable this page.
+      </div>
+
+      <div id="dashboard" class="hidden">
+        <!-- Stat tiles -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div class="border border-border bg-surface p-5">
+            <p class="font-mono text-2xs tracking-widest uppercase text-text-muted mb-2">All time</p>
+            <p id="stat-total" class="text-3xl font-semibold text-text-primary">—</p>
+          </div>
+          <div class="border border-border bg-surface p-5">
+            <p class="font-mono text-2xs tracking-widest uppercase text-text-muted mb-2">Today</p>
+            <p id="stat-today" class="text-3xl font-semibold text-text-primary">—</p>
+          </div>
+          <div class="border border-border bg-surface p-5">
+            <p class="font-mono text-2xs tracking-widest uppercase text-text-muted mb-2">Last 7 days</p>
+            <p id="stat-week" class="text-3xl font-semibold text-text-primary">—</p>
+          </div>
+        </div>
+
+        <!-- Daily chart -->
+        <section class="border border-border bg-surface p-5 mb-8">
+          <p class="font-mono text-2xs tracking-widest uppercase text-text-muted mb-4">
+            Last 30 days
+          </p>
+          <div id="daily-chart" class="flex items-end gap-[2px] h-40"></div>
+          <div class="flex justify-between mt-2">
+            <span id="daily-start" class="font-mono text-2xs text-text-muted"></span>
+            <span id="daily-end" class="font-mono text-2xs text-text-muted"></span>
+          </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Top pages -->
+          <section class="border border-border bg-surface p-5">
+            <p class="font-mono text-2xs tracking-widest uppercase text-text-muted mb-4">
+              Top pages
+            </p>
+            <div id="top-pages" class="flex flex-col gap-3"></div>
+          </section>
+
+          <!-- Top referrers -->
+          <section class="border border-border bg-surface p-5">
+            <p class="font-mono text-2xs tracking-widest uppercase text-text-muted mb-4">
+              Top referrers
+            </p>
+            <div id="top-referrers" class="flex flex-col gap-3"></div>
+          </section>
+        </div>
+
+        <button
+          id="refresh-btn"
+          type="button"
+          class="mt-8 font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-border text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors"
+        >
+          Refresh
+        </button>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase, supabaseConfigured } from '../lib/supabase';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const configWarning = $('config-warning');
+  const dashboard = $('dashboard');
+  const refreshBtn = $('refresh-btn') as HTMLButtonElement;
+
+  type DashboardStats = {
+    total: number;
+    today: number;
+    week: number;
+    daily: { day: string; count: number }[];
+    top_pages: { path: string; count: number }[];
+    top_referrers: { referrer: string; count: number }[];
+  };
+
+  function renderBarList(containerId: string, items: { label: string; count: number }[]) {
+    const container = $(containerId);
+    container.innerHTML = '';
+
+    if (items.length === 0) {
+      container.innerHTML = '<p class="text-text-muted text-sm">No data yet.</p>';
+      return;
+    }
+
+    const max = Math.max(...items.map((i) => i.count), 1);
+    for (const item of items) {
+      const row = document.createElement('div');
+      row.innerHTML = `
+        <div class="flex justify-between items-baseline mb-1 gap-3">
+          <span class="text-text-secondary text-sm truncate">${item.label}</span>
+          <span class="text-text-primary font-mono text-2xs shrink-0">${item.count.toLocaleString()}</span>
+        </div>
+        <div class="h-1.5 bg-surface-2 w-full">
+          <div class="h-full bg-red-guards" style="width: ${(item.count / max) * 100}%"></div>
+        </div>
+      `;
+      container.appendChild(row);
+    }
+  }
+
+  function renderDailyChart(daily: { day: string; count: number }[]) {
+    const chart = $('daily-chart');
+    chart.innerHTML = '';
+    const max = Math.max(...daily.map((d) => d.count), 1);
+
+    for (const d of daily) {
+      const bar = document.createElement('div');
+      const heightPct = Math.max((d.count / max) * 100, d.count > 0 ? 4 : 1);
+      bar.className = 'flex-1 bg-red-guards rounded-t-[2px]';
+      bar.style.height = `${heightPct}%`;
+      bar.title = `${d.day} • ${d.count.toLocaleString()} view${d.count === 1 ? '' : 's'}`;
+      chart.appendChild(bar);
+    }
+
+    if (daily.length > 0) {
+      $('daily-start').textContent = daily[0].day;
+      $('daily-end').textContent = daily[daily.length - 1].day;
+    }
+  }
+
+  function render(stats: DashboardStats) {
+    $('stat-total').textContent = stats.total.toLocaleString();
+    $('stat-today').textContent = stats.today.toLocaleString();
+    $('stat-week').textContent = stats.week.toLocaleString();
+
+    renderDailyChart(stats.daily);
+    renderBarList(
+      'top-pages',
+      stats.top_pages.map((p) => ({ label: p.path, count: p.count }))
+    );
+    renderBarList(
+      'top-referrers',
+      stats.top_referrers.map((r) => ({ label: r.referrer, count: r.count }))
+    );
+  }
+
+  async function load() {
+    refreshBtn.disabled = true;
+    const { data, error } = await supabase!.rpc('get_dashboard_stats');
+    refreshBtn.disabled = false;
+    if (error) {
+      dashboard.innerHTML = `<p class="text-red-guards text-sm font-mono">Couldn't load stats: ${error.message}</p>`;
+      return;
+    }
+    render(data as DashboardStats);
+  }
+
+  refreshBtn?.addEventListener('click', load);
+
+  if (!supabaseConfigured) {
+    configWarning.classList.remove('hidden');
+  } else {
+    dashboard.classList.remove('hidden');
+    load();
+  }
+</script>

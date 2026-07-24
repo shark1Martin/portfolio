@@ -4,11 +4,13 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  noindex?: boolean;
 }
 
 const {
   title = 'Your Name — Portfolio',
   description = 'Personal portfolio.',
+  noindex = false,
 } = Astro.props;
 
 const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
@@ -20,6 +22,7 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/svg+xml" href="/icon1.png" />
 
     <!-- Google Fonts: Inter + JetBrains Mono -->
@@ -55,5 +58,16 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
 
   <body class="bg-background text-text-primary font-sans antialiased selection:bg-red-guards selection:text-white">
     <slot />
+
+    <script>
+      import { supabase, supabaseConfigured } from '../lib/supabase';
+
+      if (supabaseConfigured) {
+        supabase!
+          .from('page_views')
+          .insert({ path: location.pathname, referrer: document.referrer || null })
+          .then(() => {});
+      }
+    </script>
   </body>
 </html>
