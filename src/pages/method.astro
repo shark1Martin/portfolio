@@ -192,7 +192,7 @@ import Layout from '../layouts/Layout.astro';
   const ROW_ID = 1;
   const BUCKET = 'secret-uploads';
   const OBJECT_PATH = 'current';
-  const MAX_TEXT_LENGTH = 50_000;
+  const MAX_TEXT_LENGTH = 5_000_000;
   const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
   const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 
@@ -605,13 +605,16 @@ import Layout from '../layouts/Layout.astro';
     loadCurrent();
     loadCurrentFile();
 
-    // Live updates when someone else changes the paste.
+    // Live updates when someone else changes the paste. Re-fetch rather than
+    // trusting payload.new: Postgres NOTIFY (which postgres_changes relies
+    // on) caps payloads at 8000 bytes and silently drops larger fields, so
+    // big pastes would show up empty/stale on other tabs otherwise.
     supabase!
       .channel('secret_paste_changes')
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'secret_paste', filter: `id=eq.${ROW_ID}` },
-        (payload) => render(payload.new as Row)
+        () => loadCurrent()
       )
       .subscribe();
 
