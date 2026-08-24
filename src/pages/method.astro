@@ -8,7 +8,7 @@ import Layout from '../layouts/Layout.astro';
   noindex
 >
   <main class="min-h-screen flex items-center justify-center px-6 py-24">
-    <div class="w-full max-w-2xl">
+    <div class="w-full max-w-2xl lg:max-w-5xl mx-auto">
       <div class="mb-8 text-center">
         <p class="section-label mb-3">Shared Clipboard</p>
         <p class="text-sm text-text-muted">
@@ -30,6 +30,9 @@ import Layout from '../layouts/Layout.astro';
         Supabase isn't configured — set <code>PUBLIC_SUPABASE_URL</code> and
         <code>PUBLIC_SUPABASE_ANON_KEY</code> to enable this page.
       </div>
+
+      <div class="flex flex-col lg:flex-row lg:items-start gap-8">
+      <div class="w-full lg:max-w-2xl">
 
       <!-- Current content -->
       <section
@@ -112,6 +115,62 @@ import Layout from '../layouts/Layout.astro';
 
         <p id="status-msg" class="mt-3 text-2xs font-mono text-text-muted min-h-[1em]"></p>
       </section>
+
+      </div>
+
+      <aside id="history-panel" class="w-full lg:w-64 lg:shrink-0 lg:sticky lg:top-8">
+        <span class="font-mono text-2xs tracking-widest uppercase text-text-muted block mb-3">History</span>
+        <div class="border border-border bg-surface p-3">
+          <div id="history-empty" class="text-text-muted text-2xs font-mono py-4 text-center">
+            No history yet.
+          </div>
+          <ul id="history-list" class="flex flex-col gap-2"></ul>
+        </div>
+      </aside>
+
+      </div>
+
+      <dialog id="history-modal" class="modal-dialog">
+        <div class="modal-panel bg-surface border border-border text-text-primary w-full max-w-2xl max-h-[85vh] flex flex-col">
+          <div class="flex items-center justify-between gap-4 p-6 border-b border-border shrink-0">
+            <span id="history-modal-time" class="font-mono text-2xs text-text-muted"></span>
+            <button
+              data-close-modal
+              type="button"
+              class="shrink-0 text-text-muted hover:text-text-primary transition-colors p-1"
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="overflow-y-auto flex-1 p-6">
+            <pre
+              id="history-modal-text"
+              class="hidden whitespace-pre-wrap break-words font-mono text-sm text-text-primary bg-surface-2 border border-border p-4"></pre>
+            <div id="history-modal-image" class="hidden">
+              <img
+                id="history-modal-image-el"
+                class="max-w-full max-h-96 mx-auto border border-border"
+                alt="Pasted content"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-3 p-6 border-t border-border shrink-0">
+            <p id="history-modal-status" class="text-2xs font-mono text-text-muted min-h-[1em]"></p>
+            <button
+              id="history-modal-copy-btn"
+              type="button"
+              class="font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-border text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+      </dialog>
 
       <div id="file-section" class="scroll-mt-8 mt-16">
         <div class="mb-8 text-center">
@@ -200,6 +259,10 @@ import Layout from '../layouts/Layout.astro';
   const FILE_OBJECT_PATH = 'current';
   const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
+  const HISTORY_TABLE = 'paste_history';
+  const HISTORY_LIMIT = 5;
+  const HISTORY_IMAGE_PREFIX = 'history/';
+
   const $ = (id: string) => document.getElementById(id)!;
 
   const configWarning = $('config-warning');
@@ -228,6 +291,16 @@ import Layout from '../layouts/Layout.astro';
   const fileUploadInput = $('file-upload-input') as HTMLInputElement;
   const fileStatusMsg = $('file-status-msg');
 
+  const historyEmpty = $('history-empty');
+  const historyList = $('history-list') as HTMLUListElement;
+  const historyModal = $('history-modal') as HTMLDialogElement;
+  const historyModalTime = $('history-modal-time');
+  const historyModalText = $('history-modal-text') as HTMLPreElement;
+  const historyModalImage = $('history-modal-image');
+  const historyModalImageEl = $('history-modal-image-el') as HTMLImageElement;
+  const historyModalStatus = $('history-modal-status');
+  const historyModalCopyBtn = $('history-modal-copy-btn') as HTMLButtonElement;
+
   type Row = {
     id: number;
     content_type: 'text' | 'image' | null;
@@ -244,8 +317,19 @@ import Layout from '../layouts/Layout.astro';
     updated_at: string | null;
   };
 
+  type HistoryRow = {
+    id: number;
+    content_type: 'text' | 'image';
+    content: string | null;
+    image_path: string | null;
+    image_mime: string | null;
+    created_at: string;
+  };
+
   let current: Row | null = null;
   let currentFile: FileRow | null = null;
+  let historyItems: HistoryRow[] = [];
+  let activeHistoryItem: HistoryRow | null = null;
 
   function setStatus(msg: string, isError = false) {
     statusMsg.textContent = msg;
@@ -478,6 +562,7 @@ import Layout from '../layouts/Layout.astro';
     textInput.value = '';
     setStatus('Saved.');
     await loadCurrent();
+    void insertHistory({ content_type: 'text', content: text });
   }
 
   async function saveImage(file: File) {
@@ -520,6 +605,7 @@ import Layout from '../layouts/Layout.astro';
     fileInput.value = '';
     setStatus('Saved.');
     await loadCurrent();
+    void insertHistory({ content_type: 'image', file });
   }
 
   async function clearCurrent() {
@@ -537,19 +623,227 @@ import Layout from '../layouts/Layout.astro';
     await loadCurrent();
   }
 
-  async function copyCurrent() {
-    if (!current) return;
+  async function copyEntry(
+    contentType: 'text' | 'image' | null,
+    text: string | null,
+    imageSrc: string,
+    onStatus: (msg: string, isError?: boolean) => void
+  ) {
     try {
-      if (current.content_type === 'text') {
-        await navigator.clipboard.writeText(current.content ?? '');
-      } else if (current.content_type === 'image') {
-        const res = await fetch(imageEl.src);
+      if (contentType === 'text') {
+        await navigator.clipboard.writeText(text ?? '');
+      } else if (contentType === 'image') {
+        const res = await fetch(imageSrc);
         const blob = await res.blob();
         await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
       }
-      setStatus('Copied.');
+      onStatus('Copied.');
     } catch {
-      setStatus('Copy not supported in this browser — right-click to copy manually.', true);
+      onStatus('Copy not supported in this browser — right-click to copy manually.', true);
+    }
+  }
+
+  async function copyCurrent() {
+    if (!current) return;
+    await copyEntry(current.content_type, current.content, imageEl.src, setStatus);
+  }
+
+  function historyImageUrl(path: string) {
+    const { data } = supabase!.storage.from(BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  function formatHistoryTime(iso: string) {
+    return new Date(iso).toLocaleString();
+  }
+
+  function setHistoryModalStatus(msg: string, isError = false) {
+    historyModalStatus.textContent = msg;
+    historyModalStatus.classList.toggle('text-red-guards', isError);
+    historyModalStatus.classList.toggle('text-text-muted', !isError);
+  }
+
+  function renderHistory() {
+    historyEmpty.classList.toggle('hidden', historyItems.length > 0);
+    historyList.innerHTML = '';
+
+    for (const item of historyItems) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className =
+        'w-full text-left border border-border bg-surface-2 hover:border-text-secondary transition-colors p-2';
+
+      if (item.content_type === 'image' && item.image_path) {
+        const img = document.createElement('img');
+        img.src = historyImageUrl(item.image_path);
+        img.alt = 'Pasted image';
+        img.className = 'w-full h-14 object-cover border border-border';
+        btn.appendChild(img);
+      } else {
+        const preview = document.createElement('span');
+        preview.className = 'block truncate font-mono text-2xs text-text-secondary';
+        preview.textContent = (item.content ?? '').slice(0, 80) || '(empty)';
+        btn.appendChild(preview);
+      }
+
+      const time = document.createElement('span');
+      time.className = 'block font-mono text-2xs text-text-muted mt-1';
+      time.textContent = formatHistoryTime(item.created_at);
+      btn.appendChild(time);
+
+      btn.addEventListener('click', () => openHistoryItem(item));
+
+      const li = document.createElement('li');
+      li.appendChild(btn);
+      historyList.appendChild(li);
+    }
+  }
+
+  async function loadHistory() {
+    const { data, error } = await supabase!
+      .from(HISTORY_TABLE)
+      .select('id, content_type, content, image_path, image_mime, created_at')
+      .order('id', { ascending: false })
+      .limit(HISTORY_LIMIT);
+
+    if (error) {
+      console.error('Could not load history:', error.message);
+      return;
+    }
+    historyItems = (data ?? []) as HistoryRow[];
+    renderHistory();
+  }
+
+  function openHistoryItem(item: HistoryRow) {
+    activeHistoryItem = item;
+    setHistoryModalStatus('');
+    historyModalTime.textContent = formatHistoryTime(item.created_at);
+
+    historyModalText.classList.add('hidden');
+    historyModalImage.classList.add('hidden');
+
+    if (item.content_type === 'text') {
+      historyModalText.textContent = item.content ?? '';
+      historyModalText.classList.remove('hidden');
+    } else if (item.content_type === 'image' && item.image_path) {
+      historyModalImageEl.src = historyImageUrl(item.image_path);
+      historyModalImage.classList.remove('hidden');
+    }
+
+    historyModal.showModal();
+  }
+
+  // Best-effort heuristic: Supabase doesn't reliably document exact wording
+  // for a project-wide storage/DB quota error, so this matches on common
+  // signals (413/507 status, or quota-ish wording) rather than an exact
+  // error shape. Deliberately conservative — an error that doesn't look
+  // capacity-related is surfaced as-is rather than evicting history for
+  // what might be an unrelated/transient failure.
+  function isQuotaLikeError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') return false;
+    const e = error as { status?: number; statusCode?: string | number; message?: string };
+    const status = Number(e.statusCode ?? e.status);
+    if (status === 413 || status === 507) return true;
+    const message = (e.message ?? '').toLowerCase();
+    return ['storage', 'quota', 'limit', 'insufficient', 'full'].some((kw) => message.includes(kw));
+  }
+
+  // Storage object removed before the DB row: if the row delete then fails,
+  // the result is a harmless dangling row that self-heals on the next
+  // prune pass, rather than a row pointing at a now-missing image.
+  async function evictOldestHistoryItem(): Promise<boolean> {
+    const { data, error } = await supabase!
+      .from(HISTORY_TABLE)
+      .select('id, image_path')
+      .order('id', { ascending: true })
+      .limit(1);
+
+    if (error || !data || data.length === 0) return false;
+
+    const oldest = data[0] as { id: number; image_path: string | null };
+    if (oldest.image_path) {
+      await supabase!.storage.from(BUCKET).remove([oldest.image_path]);
+    }
+    await supabase!.from(HISTORY_TABLE).delete().eq('id', oldest.id);
+    return true;
+  }
+
+  async function pruneHistoryToLimit() {
+    const { data, error } = await supabase!
+      .from(HISTORY_TABLE)
+      .select('id, image_path')
+      .order('id', { ascending: false });
+
+    if (error || !data) return;
+
+    const excess = data.slice(HISTORY_LIMIT) as { id: number; image_path: string | null }[];
+    for (const row of excess) {
+      if (row.image_path) {
+        await supabase!.storage.from(BUCKET).remove([row.image_path]);
+      }
+      await supabase!.from(HISTORY_TABLE).delete().eq('id', row.id);
+    }
+  }
+
+  type HistoryEntry =
+    | { content_type: 'text'; content: string }
+    | { content_type: 'image'; file: File };
+
+  async function tryInsertOnce(entry: HistoryEntry): Promise<{ ok: true } | { ok: false; error: unknown }> {
+    let imagePath: string | null = null;
+
+    if (entry.content_type === 'image') {
+      imagePath = `${HISTORY_IMAGE_PREFIX}${crypto.randomUUID()}`;
+      const { error: uploadError } = await supabase!.storage
+        .from(BUCKET)
+        .upload(imagePath, entry.file, { contentType: entry.file.type });
+      if (uploadError) return { ok: false, error: uploadError };
+    }
+
+    const { error: insertError } = await supabase!.from(HISTORY_TABLE).insert({
+      content_type: entry.content_type,
+      content: entry.content_type === 'text' ? entry.content : null,
+      image_path: imagePath,
+      image_mime: entry.content_type === 'image' ? entry.file.type : null,
+    });
+
+    if (insertError) {
+      // Upload already succeeded — without this, the object would orphan
+      // permanently, since pruning only ever looks at DB rows to decide
+      // what to delete from storage.
+      if (imagePath) {
+        await supabase!.storage.from(BUCKET).remove([imagePath]);
+      }
+      return { ok: false, error: insertError };
+    }
+
+    return { ok: true };
+  }
+
+  // Bounded retry: up to HISTORY_LIMIT insert attempts, evicting the single
+  // oldest history item between failed attempts when the failure looks
+  // capacity-related, stopping early if history runs out first. The
+  // paste itself (secret_paste) has already been saved by the time this
+  // runs, so a failure here never loses the user's actual paste — only
+  // the history log entry can fail to record. Errors are swallowed here
+  // deliberately; this must never throw into saveText/saveImage.
+  async function insertHistory(entry: HistoryEntry) {
+    try {
+      for (let attempt = 1; attempt <= HISTORY_LIMIT; attempt++) {
+        const result = await tryInsertOnce(entry);
+        if (result.ok) {
+          await pruneHistoryToLimit();
+          await loadHistory();
+          return;
+        }
+        if (attempt === HISTORY_LIMIT || !isQuotaLikeError(result.error)) {
+          throw result.error;
+        }
+        const evicted = await evictOldestHistoryItem();
+        if (!evicted) throw result.error;
+      }
+    } catch (err) {
+      console.error('History append failed:', err);
     }
   }
 
@@ -573,6 +867,20 @@ import Layout from '../layouts/Layout.astro';
         return;
       }
     }
+  });
+
+  historyModalCopyBtn.addEventListener('click', () => {
+    if (!activeHistoryItem) return;
+    copyEntry(
+      activeHistoryItem.content_type,
+      activeHistoryItem.content,
+      historyModalImageEl.src,
+      setHistoryModalStatus
+    );
+  });
+  historyModal.querySelector('[data-close-modal]')?.addEventListener('click', () => historyModal.close());
+  historyModal.addEventListener('click', (e) => {
+    if (e.target === historyModal) historyModal.close();
   });
 
   fileDownloadBtn.addEventListener('click', downloadCurrentFile);
@@ -601,9 +909,11 @@ import Layout from '../layouts/Layout.astro';
     configWarning.classList.remove('hidden');
     emptyState.textContent = 'Not configured.';
     fileEmptyState.textContent = 'Not configured.';
+    historyEmpty.textContent = 'Not configured.';
   } else {
     loadCurrent();
     loadCurrentFile();
+    loadHistory();
 
     // Live updates when someone else changes the paste. Re-fetch rather than
     // trusting payload.new: Postgres NOTIFY (which postgres_changes relies
@@ -625,6 +935,19 @@ import Layout from '../layouts/Layout.astro';
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'secret_file', filter: `id=eq.${ROW_ID}` },
         (payload) => renderFile(payload.new as FileRow)
+      )
+      .subscribe();
+
+    // Live updates when someone else adds to or prunes history. Always
+    // re-fetch (same reasoning as above) rather than trusting the payload —
+    // also simpler here since inserts and deletes both just mean "re-fetch
+    // the last 5," so one '*' listener covers both.
+    supabase!
+      .channel('paste_history_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'paste_history' },
+        () => loadHistory()
       )
       .subscribe();
   }
