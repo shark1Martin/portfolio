@@ -48,8 +48,9 @@ begin
 end $$;
 
 -- 3. Storage bucket for the uploaded file. No mime allowlist — accepts
---    (almost) any file type. 20MB cap; raise file_size_limit if you need
---    bigger files. The SELECT policy below isn't for public downloads
+--    (almost) any file type. 50MB cap, the Free plan maximum (Pro can
+--    raise file_size_limit further). The SELECT policy below isn't for
+--    public downloads
 --    (those go through the public bucket's CDN path and bypass RLS) —
 --    it's required so upload(..., { upsert: true }) can look up whether
 --    an object already exists before deciding to insert or update it.
@@ -60,7 +61,7 @@ values (
   'secret-files',
   'secret-files',
   true,
-  20971520
+  52428800
 )
 on conflict (id) do update set
   public = excluded.public,

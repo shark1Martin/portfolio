@@ -1,5 +1,21 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+const btn =
+  'inline-flex items-center justify-center font-mono text-2xs tracking-widest uppercase px-3 py-1.5 border border-border text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors';
+const btnDanger =
+  'inline-flex items-center justify-center font-mono text-2xs tracking-widest uppercase px-3 py-1.5 border border-red-guards-dim text-red-guards hover:bg-red-guards-dim/10 transition-colors';
+const btnPrimary =
+  'inline-flex items-center justify-center font-mono text-2xs tracking-widest uppercase px-4 py-2 bg-red-guards text-white hover:bg-red-guards-glow transition-colors';
+const iconBtn =
+  'inline-flex items-center justify-center w-7 h-7 border border-border text-text-muted hover:text-text-primary hover:border-text-secondary transition-colors';
+const iconBtnDanger =
+  'inline-flex items-center justify-center w-7 h-7 border border-border text-text-muted hover:text-red-guards hover:border-red-guards-dim transition-colors';
+const panel = 'border border-border bg-surface min-w-0';
+const panelHead = 'flex items-center justify-between gap-3 px-4 py-3 border-b border-border';
+const panelTitle = 'font-mono text-2xs tracking-widest uppercase text-text-secondary';
+const meta = 'font-mono text-2xs text-text-muted';
+const kbd = 'px-1 border border-border text-text-secondary';
 ---
 
 <Layout
@@ -7,21 +23,22 @@ import Layout from '../layouts/Layout.astro';
   description="A shared clipboard. What's here is visible to anyone with the link."
   noindex
 >
-  <main class="min-h-screen flex items-center justify-center px-6 py-24">
-    <div class="w-full max-w-2xl lg:max-w-5xl mx-auto">
-      <div class="mb-8 text-center">
-        <p class="section-label mb-3">Shared Clipboard</p>
-        <p class="text-sm text-text-muted">
-          One shared slot. Anyone with this link can see it, copy it, delete it,
-          or overwrite it with something new.
+  <main class="min-h-screen px-4 sm:px-6 py-10 lg:py-14">
+    <div class="w-full max-w-7xl mx-auto">
+      <header class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 mb-6">
+        <div>
+          <p class="section-label mb-2">Shared Clipboard</p>
+          <p class="text-sm text-text-muted">
+            Anyone with this link can see, copy, and delete what's here.
+          </p>
+        </div>
+        <p class={meta}>
+          <kbd class={kbd}>Ctrl+V</kbd> anywhere saves instantly ·
+          <kbd class={kbd}>Ctrl+Enter</kbd> saves typed text ·
+          drop files anywhere ·
+          <a href="/method.txt" class="text-text-secondary hover:text-text-primary underline underline-offset-2">API</a>
         </p>
-        <a
-          href="#file-section"
-          class="inline-block mt-4 font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-border text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors"
-        >
-          ↓ Jump to file upload
-        </a>
-      </div>
+      </header>
 
       <div
         id="config-warning"
@@ -31,333 +48,351 @@ import Layout from '../layouts/Layout.astro';
         <code>PUBLIC_SUPABASE_ANON_KEY</code> to enable this page.
       </div>
 
-      <div class="flex flex-col lg:flex-row lg:items-start gap-8">
-      <div class="w-full lg:max-w-2xl">
-
-      <!-- Current content -->
-      <section
-        id="current-panel"
-        class="border border-border bg-surface p-5 mb-6"
+      <div
+        class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_20rem] gap-6 items-start"
       >
-        <div class="flex items-center justify-between mb-3">
-          <span class="font-mono text-2xs tracking-widest uppercase text-text-muted"
-            >Currently pasted</span
-          >
-          <span id="updated-at" class="font-mono text-2xs text-text-muted"></span>
-        </div>
-
-        <div id="empty-state" class="text-text-muted text-sm py-8 text-center">
-          Loading…
-        </div>
-
-        <pre
-          id="text-view"
-          class="hidden whitespace-pre-wrap break-words font-mono text-sm text-text-primary bg-surface-2 border border-border p-4 max-h-96 overflow-auto"></pre>
-
-        <div id="image-view" class="hidden">
-          <img
-            id="image-el"
-            class="max-w-full max-h-96 mx-auto border border-border"
-            alt="Pasted content"
-          />
-        </div>
-
-        <div id="action-row" class="hidden mt-4 flex flex-wrap gap-3">
-          <button
-            id="copy-btn"
-            type="button"
-            class="font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-border text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors"
-          >
-            Copy
-          </button>
-          <button
-            id="delete-btn"
-            type="button"
-            class="font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-red-guards-dim text-red-guards hover:bg-red-guards-dim/10 transition-colors"
-          >
-            Delete
-          </button>
-        </div>
-      </section>
-
-      <!-- Paste new content -->
-      <section class="border border-border bg-surface p-5">
-        <span
-          class="font-mono text-2xs tracking-widest uppercase text-text-muted block mb-3"
-          >Paste something new</span
-        >
-
-        <textarea
-          id="text-input"
-          rows="5"
-          placeholder="Type or paste text/code here — or paste (Ctrl/Cmd+V) an image directly"
-          class="w-full bg-surface-2 border border-border text-text-primary font-mono text-sm p-3 resize-y focus:outline-none focus:border-red-guards-dim placeholder:text-text-muted"
-        ></textarea>
-
-        <div class="flex flex-wrap items-center gap-3 mt-3">
-          <button
-            id="save-text-btn"
-            type="button"
-            class="font-mono text-2xs tracking-widest uppercase px-4 py-2 bg-red-guards text-white hover:bg-red-guards-glow transition-colors"
-          >
-            Save text
-          </button>
-
-          <span class="text-text-muted text-2xs font-mono">or</span>
-
-          <label
-            class="font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-border text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors cursor-pointer"
-          >
-            Choose image
-            <input id="file-input" type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="hidden" />
-          </label>
-        </div>
-
-        <p id="status-msg" class="mt-3 text-2xs font-mono text-text-muted min-h-[1em]"></p>
-      </section>
-
-      </div>
-
-      <aside id="history-panel" class="w-full lg:w-64 lg:shrink-0 lg:sticky lg:top-8">
-        <span class="font-mono text-2xs tracking-widest uppercase text-text-muted block mb-3">History</span>
-        <div class="border border-border bg-surface p-3">
-          <div id="history-empty" class="text-text-muted text-2xs font-mono py-4 text-center">
-            No history yet.
-          </div>
-          <ul id="history-list" class="flex flex-col gap-2"></ul>
-        </div>
-      </aside>
-
-      </div>
-
-      <dialog id="history-modal" class="modal-dialog">
-        <div class="modal-panel bg-surface border border-border text-text-primary w-full max-w-2xl max-h-[85vh] flex flex-col">
-          <div class="flex items-center justify-between gap-4 p-6 border-b border-border shrink-0">
-            <span id="history-modal-time" class="font-mono text-2xs text-text-muted"></span>
-            <button
-              data-close-modal
-              type="button"
-              class="shrink-0 text-text-muted hover:text-text-primary transition-colors p-1"
-              aria-label="Close"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-              </svg>
-            </button>
+        <!-- Text -->
+        <section id="text-panel" class={panel}>
+          <div class={panelHead}>
+            <h2 class={panelTitle}>
+              Text <span id="text-count" class="text-text-muted"></span>
+            </h2>
           </div>
 
-          <div class="overflow-y-auto flex-1 p-6">
+          <div class="p-4 border-b border-border">
+            <textarea
+              id="text-input"
+              rows="3"
+              placeholder="Type or paste here, then Ctrl+Enter"
+              class="w-full bg-surface-2 border border-border text-text-primary font-mono text-sm p-3 resize-y focus:outline-none focus:border-red-guards-dim placeholder:text-text-muted"
+            ></textarea>
+            <div class="flex justify-end mt-2">
+              <button id="save-text-btn" type="button" class={btnPrimary}>Save text</button>
+            </div>
+          </div>
+
+          <div id="text-latest" class="hidden p-4 border-b border-border">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span class={meta}>
+                <span class="text-text-secondary">Latest</span> ·
+                <span id="text-latest-meta"></span>
+              </span>
+              <div class="flex gap-2">
+                <button type="button" data-action="copy" class={btn}>Copy</button>
+                <button type="button" data-action="view" class={btn}>Expand</button>
+                <button type="button" data-action="delete" class={btnDanger}>Delete</button>
+              </div>
+            </div>
             <pre
-              id="history-modal-text"
-              class="hidden whitespace-pre-wrap break-words font-mono text-sm text-text-primary bg-surface-2 border border-border p-4"></pre>
-            <div id="history-modal-image" class="hidden">
-              <img
-                id="history-modal-image-el"
-                class="max-w-full max-h-96 mx-auto border border-border"
-                alt="Pasted content"
-              />
-            </div>
+              id="text-latest-body"
+              class="whitespace-pre-wrap break-words font-mono text-sm text-text-primary bg-surface-2 border border-border p-3 max-h-80 overflow-auto"></pre>
           </div>
 
-          <div class="flex items-center justify-between gap-3 p-6 border-t border-border shrink-0">
-            <p id="history-modal-status" class="text-2xs font-mono text-text-muted min-h-[1em]"></p>
-            <button
-              id="history-modal-copy-btn"
-              type="button"
-              class="font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-border text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors"
-            >
-              Copy
-            </button>
-          </div>
-        </div>
-      </dialog>
-
-      <div id="file-section" class="scroll-mt-8 mt-16">
-        <div class="mb-8 text-center">
-          <p class="section-label mb-3">File Upload</p>
-          <p class="text-sm text-text-muted">
-            Same idea, but for files. One shared slot — upload something,
-            anyone with this link can download it.
-          </p>
-        </div>
-
-        <!-- Current file -->
-        <section
-          id="file-current-panel"
-          class="border border-border bg-surface p-5 mb-6"
-        >
-          <div class="flex items-center justify-between mb-3">
-            <span class="font-mono text-2xs tracking-widest uppercase text-text-muted"
-              >Currently uploaded</span
-            >
-            <span id="file-updated-at" class="font-mono text-2xs text-text-muted"></span>
-          </div>
-
-          <div id="file-empty-state" class="text-text-muted text-sm py-8 text-center">
-            Loading…
-          </div>
-
-          <div id="file-view" class="hidden flex items-center justify-between gap-3 bg-surface-2 border border-border p-4">
-            <div class="min-w-0">
-              <p id="file-name" class="font-mono text-sm text-text-primary truncate"></p>
-              <p id="file-size" class="font-mono text-2xs text-text-muted"></p>
-            </div>
-          </div>
-
-          <div id="file-action-row" class="hidden mt-4 flex flex-wrap gap-3">
-            <button
-              id="file-download-btn"
-              type="button"
-              class="font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-border text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors"
-            >
-              Download
-            </button>
-            <button
-              id="file-delete-btn"
-              type="button"
-              class="font-mono text-2xs tracking-widest uppercase px-4 py-2 border border-red-guards-dim text-red-guards hover:bg-red-guards-dim/10 transition-colors"
-            >
-              Delete
-            </button>
-          </div>
+          <p id="text-empty" class="px-4 py-8 text-center text-sm text-text-muted">Loading…</p>
+          <ol id="text-list" class="divide-y divide-border"></ol>
         </section>
 
-        <!-- Upload new file -->
-        <section class="border border-border bg-surface p-5">
-          <span
-            class="font-mono text-2xs tracking-widest uppercase text-text-muted block mb-3"
-            >Upload something new</span
-          >
+        <!-- Screenshots -->
+        <section id="shot-panel" class={panel}>
+          <div class={panelHead}>
+            <h2 class={panelTitle}>
+              Screenshots <span id="shot-count" class="text-text-muted"></span>
+            </h2>
+            <label class={`${btn} cursor-pointer`}>
+              Choose image
+              <input
+                id="shot-input"
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                class="hidden"
+              />
+            </label>
+          </div>
 
-          <label
-            id="file-drop-zone"
-            class="flex flex-col items-center justify-center gap-2 border border-dashed border-border bg-surface-2 p-8 text-center cursor-pointer hover:border-text-secondary transition-colors"
-          >
-            <span class="text-text-secondary text-sm">Drop a file here, or click to choose one</span>
-            <span class="text-text-muted text-2xs font-mono">Max 20MB · any file type</span>
-            <input id="file-upload-input" type="file" class="hidden" />
-          </label>
+          <div id="shot-latest" class="hidden p-4 border-b border-border">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span class={meta}>
+                <span class="text-text-secondary">Latest</span> ·
+                <span id="shot-latest-meta"></span>
+              </span>
+              <div class="flex gap-2">
+                <button type="button" data-action="copy" class={btn}>Copy</button>
+                <a id="shot-latest-open" target="_blank" rel="noopener" class={btn}>Open</a>
+                <button type="button" data-action="delete" class={btnDanger}>Delete</button>
+              </div>
+            </div>
+            <button type="button" data-action="view" class="block w-full">
+              <img
+                id="shot-latest-img"
+                alt="Latest screenshot"
+                class="w-full max-h-[28rem] object-contain bg-surface-2 border border-border"
+              />
+            </button>
+          </div>
 
-          <p id="file-status-msg" class="mt-3 text-2xs font-mono text-text-muted min-h-[1em]"></p>
+          <p id="shot-empty" class="px-4 py-8 text-center text-sm text-text-muted">Loading…</p>
+          <ol
+            id="shot-list"
+            class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 2xl:grid-cols-4 gap-2 p-4 empty:hidden"
+          ></ol>
+        </section>
+
+        <!-- File -->
+        <section id="file-panel" class={`${panel} lg:col-span-2 xl:col-span-1`}>
+          <div class={panelHead}>
+            <h2 class={panelTitle}>File</h2>
+            <span class={meta}>One slot · max 50 MB</span>
+          </div>
+          <div class="p-4">
+            <div id="file-current" class="hidden mb-4">
+              <p id="file-name" class="font-mono text-sm text-text-primary break-all"></p>
+              <p id="file-meta" class={`${meta} mt-1`}></p>
+              <div class="flex gap-2 mt-3">
+                <a id="file-download" class={btn}>Download</a>
+                <button id="file-delete" type="button" class={btnDanger}>Delete</button>
+              </div>
+            </div>
+            <p id="file-empty" class="text-sm text-text-muted mb-4">Loading…</p>
+            <label
+              id="file-drop-zone"
+              class="flex flex-col items-center justify-center gap-1 border border-dashed border-border bg-surface-2 p-6 text-center cursor-pointer hover:border-text-secondary transition-colors"
+            >
+              <span class="text-text-secondary text-sm">Drop a file here or click to choose</span>
+              <span class={meta}>Any type · replaces the current file</span>
+              <input id="file-input" type="file" class="hidden" />
+            </label>
+          </div>
         </section>
       </div>
     </div>
   </main>
+
+  <dialog id="viewer" class="modal-dialog">
+    <div
+      id="viewer-panel"
+      class="modal-panel bg-surface border border-border text-text-primary w-full max-w-4xl max-h-[90vh] flex flex-col"
+    >
+      <div class="flex items-center justify-between gap-4 px-5 py-3 border-b border-border shrink-0">
+        <span id="viewer-meta" class={meta}></span>
+        <button
+          id="viewer-close"
+          type="button"
+          class="shrink-0 text-text-muted hover:text-text-primary transition-colors p-1"
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="overflow-auto flex-1 p-5">
+        <pre
+          id="viewer-text"
+          class="hidden whitespace-pre-wrap break-words font-mono text-sm text-text-primary bg-surface-2 border border-border p-4"></pre>
+        <img id="viewer-img" alt="Screenshot" class="hidden max-w-full mx-auto border border-border" />
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-t border-border shrink-0">
+        <p id="viewer-status" class="font-mono text-2xs text-text-secondary min-h-[1em]"></p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-action="copy" class={btn}>Copy</button>
+          <a id="viewer-open" target="_blank" rel="noopener" class={btn}>Open</a>
+          <button id="viewer-bump" type="button" data-action="bump" class={btn}>Make latest</button>
+          <button type="button" data-action="delete" class={btnDanger}>Delete</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <div
+    id="toast"
+    role="status"
+    aria-live="polite"
+    class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-[calc(100%-2rem)] font-mono text-2xs text-text-secondary px-4 py-2 border border-border bg-surface shadow-lg transition-opacity opacity-0 pointer-events-none"
+  >
+  </div>
+
+  <template id="text-row-tpl">
+    <li class="flex items-start gap-3 px-4 py-2.5 hover:bg-surface-2 transition-colors">
+      <button type="button" data-action="view" class="min-w-0 flex-1 text-left">
+        <span
+          data-field="preview"
+          class="block font-mono text-xs text-text-secondary line-clamp-2 whitespace-pre-wrap break-words"
+        ></span>
+        <span data-field="meta" class={`block ${meta} mt-1`}></span>
+      </button>
+      <div class="flex shrink-0 gap-1.5">
+        <button type="button" data-action="copy" class={iconBtn} title="Copy" aria-label="Copy">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+          </svg>
+        </button>
+        <button type="button" data-action="bump" class={iconBtn} title="Make latest" aria-label="Make latest">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 3h14"/><path d="m18 13-6-6-6 6"/><path d="M12 7v14"/>
+          </svg>
+        </button>
+        <button type="button" data-action="delete" class={iconBtnDanger} title="Delete" aria-label="Delete">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          </svg>
+        </button>
+      </div>
+    </li>
+  </template>
+
+  <template id="shot-tile-tpl">
+    <li>
+      <button
+        type="button"
+        data-action="view"
+        class="relative block w-full aspect-video overflow-hidden border border-border bg-surface-2 hover:border-text-secondary transition-colors"
+      >
+        <img data-field="img" loading="lazy" alt="Screenshot" class="w-full h-full object-cover" />
+        <span
+          data-field="meta"
+          class="absolute inset-x-0 bottom-0 bg-background/80 px-1.5 py-0.5 font-mono text-2xs text-text-secondary text-left truncate"
+        ></span>
+      </button>
+    </li>
+  </template>
 </Layout>
 
 <script>
   import { supabase, supabaseConfigured } from '../lib/supabase';
+  import { KEEP_PER_KIND } from '../lib/clipboardApi';
 
-  const ROW_ID = 1;
-  const BUCKET = 'secret-uploads';
-  const OBJECT_PATH = 'current';
+  const TABLE = 'paste_history';
+  const IMAGE_BUCKET = 'secret-uploads';
+  const IMAGE_PREFIX = 'history/';
+  const FILE_TABLE = 'secret_file';
+  const FILE_BUCKET = 'secret-files';
+  const FILE_ROW_ID = 1;
   const MAX_TEXT_LENGTH = 5_000_000;
   const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+  const MAX_FILE_BYTES = 50 * 1024 * 1024;
   const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+  const SETUP_HINT = 'has supabase/clipboard_v2_setup.sql been run?';
 
-  const FILE_BUCKET = 'secret-files';
-  const FILE_OBJECT_PATH = 'current';
-  const MAX_FILE_BYTES = 20 * 1024 * 1024;
+  type Kind = 'text' | 'image';
 
-  const HISTORY_TABLE = 'paste_history';
-  const HISTORY_LIMIT = 5;
-  const HISTORY_IMAGE_PREFIX = 'history/';
-
-  const $ = (id: string) => document.getElementById(id)!;
-
-  const configWarning = $('config-warning');
-  const emptyState = $('empty-state');
-  const textView = $('text-view') as HTMLPreElement;
-  const imageView = $('image-view');
-  const imageEl = $('image-el') as HTMLImageElement;
-  const actionRow = $('action-row');
-  const updatedAtEl = $('updated-at');
-  const copyBtn = $('copy-btn') as HTMLButtonElement;
-  const deleteBtn = $('delete-btn') as HTMLButtonElement;
-  const textInput = $('text-input') as HTMLTextAreaElement;
-  const saveTextBtn = $('save-text-btn') as HTMLButtonElement;
-  const fileInput = $('file-input') as HTMLInputElement;
-  const statusMsg = $('status-msg');
-
-  const fileEmptyState = $('file-empty-state');
-  const fileView = $('file-view');
-  const fileNameEl = $('file-name');
-  const fileSizeEl = $('file-size');
-  const fileActionRow = $('file-action-row');
-  const fileUpdatedAtEl = $('file-updated-at');
-  const fileDownloadBtn = $('file-download-btn') as HTMLButtonElement;
-  const fileDeleteBtn = $('file-delete-btn') as HTMLButtonElement;
-  const fileDropZone = $('file-drop-zone');
-  const fileUploadInput = $('file-upload-input') as HTMLInputElement;
-  const fileStatusMsg = $('file-status-msg');
-
-  const historyEmpty = $('history-empty');
-  const historyList = $('history-list') as HTMLUListElement;
-  const historyModal = $('history-modal') as HTMLDialogElement;
-  const historyModalTime = $('history-modal-time');
-  const historyModalText = $('history-modal-text') as HTMLPreElement;
-  const historyModalImage = $('history-modal-image');
-  const historyModalImageEl = $('history-modal-image-el') as HTMLImageElement;
-  const historyModalStatus = $('history-modal-status');
-  const historyModalCopyBtn = $('history-modal-copy-btn') as HTMLButtonElement;
-
-  type Row = {
+  type Item = {
     id: number;
-    content_type: 'text' | 'image' | null;
-    content: string | null;
-    image_mime: string | null;
-    updated_at: string | null;
-  };
-
-  type FileRow = {
-    id: number;
-    file_name: string | null;
-    file_mime: string | null;
-    file_size: number | null;
-    updated_at: string | null;
-  };
-
-  type HistoryRow = {
-    id: number;
-    content_type: 'text' | 'image';
+    content_type: Kind;
     content: string | null;
     image_path: string | null;
     image_mime: string | null;
     created_at: string;
   };
 
-  let current: Row | null = null;
+  type FileRow = {
+    file_name: string | null;
+    file_mime: string | null;
+    file_size: number | null;
+    file_path: string | null;
+    updated_at: string | null;
+  };
+
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+
+  const configWarning = $('config-warning');
+  const toast = $('toast');
+
+  const textInput = $<HTMLTextAreaElement>('text-input');
+  const saveTextBtn = $<HTMLButtonElement>('save-text-btn');
+  const textCount = $('text-count');
+  const textLatest = $('text-latest');
+  const textLatestMeta = $('text-latest-meta');
+  const textLatestBody = $('text-latest-body');
+  const textEmpty = $('text-empty');
+  const textList = $<HTMLOListElement>('text-list');
+  const textRowTpl = $<HTMLTemplateElement>('text-row-tpl');
+
+  const shotInput = $<HTMLInputElement>('shot-input');
+  const shotCount = $('shot-count');
+  const shotLatest = $('shot-latest');
+  const shotLatestMeta = $('shot-latest-meta');
+  const shotLatestImg = $<HTMLImageElement>('shot-latest-img');
+  const shotLatestOpen = $<HTMLAnchorElement>('shot-latest-open');
+  const shotEmpty = $('shot-empty');
+  const shotList = $<HTMLOListElement>('shot-list');
+  const shotTileTpl = $<HTMLTemplateElement>('shot-tile-tpl');
+
+  const fileCurrent = $('file-current');
+  const fileNameEl = $('file-name');
+  const fileMetaEl = $('file-meta');
+  const fileDownload = $<HTMLAnchorElement>('file-download');
+  const fileDeleteBtn = $<HTMLButtonElement>('file-delete');
+  const fileEmpty = $('file-empty');
+  const fileDropZone = $('file-drop-zone');
+  const fileInput = $<HTMLInputElement>('file-input');
+
+  const viewer = $<HTMLDialogElement>('viewer');
+  const viewerPanel = $('viewer-panel');
+  const viewerMeta = $('viewer-meta');
+  const viewerText = $('viewer-text');
+  const viewerImg = $<HTMLImageElement>('viewer-img');
+  const viewerOpen = $<HTMLAnchorElement>('viewer-open');
+  const viewerBump = $<HTMLButtonElement>('viewer-bump');
+  const viewerStatus = $('viewer-status');
+
+  const items: Record<Kind, Item[]> = { text: [], image: [] };
   let currentFile: FileRow | null = null;
-  let historyItems: HistoryRow[] = [];
-  let activeHistoryItem: HistoryRow | null = null;
+  let uploadingFile = false;
 
-  function setStatus(msg: string, isError = false) {
-    statusMsg.textContent = msg;
-    statusMsg.classList.toggle('text-red-guards', isError);
-    statusMsg.classList.toggle('text-text-muted', !isError);
+  // ── Small helpers ─────────────────────────────────────────────────────────
+
+  let toastTimer: number | undefined;
+
+  // The viewer is a modal <dialog> in the top layer, which covers the toast,
+  // so messages also go to the viewer's own status line.
+  function notify(msg: string, isError = false) {
+    for (const el of [toast, viewerStatus]) {
+      el.textContent = msg;
+      el.classList.toggle('text-red-guards', isError);
+      el.classList.toggle('text-text-secondary', !isError);
+    }
+    toast.classList.toggle('border-red-guards-dim', isError);
+    toast.classList.toggle('border-border', !isError);
+    toast.classList.remove('opacity-0');
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(
+      () => {
+        toast.classList.add('opacity-0');
+        viewerStatus.textContent = '';
+      },
+      isError ? 8000 : 3000
+    );
   }
 
-  function setBusy(busy: boolean) {
-    [saveTextBtn, copyBtn, deleteBtn, fileInput].forEach((el) => {
-      (el as HTMLButtonElement | HTMLInputElement).disabled = busy;
-    });
+  function errorMessage(error: unknown) {
+    return (error as { message?: string })?.message ?? String(error);
   }
 
-  function publicImageUrl(updatedAt: string | null) {
-    const { data } = supabase!.storage.from(BUCKET).getPublicUrl(OBJECT_PATH);
-    const bust = updatedAt ? `?t=${encodeURIComponent(updatedAt)}` : '';
-    return `${data.publicUrl}${bust}`;
+  function ago(iso: string) {
+    const seconds = (Date.now() - Date.parse(iso)) / 1000;
+    if (seconds < 45) return 'just now';
+    const minutes = Math.round(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.round(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(iso).toLocaleDateString();
   }
 
-  function setFileStatus(msg: string, isError = false) {
-    fileStatusMsg.textContent = msg;
-    fileStatusMsg.classList.toggle('text-red-guards', isError);
-    fileStatusMsg.classList.toggle('text-text-muted', !isError);
+  function timeEl(iso: string) {
+    const el = document.createElement('time');
+    el.dateTime = iso;
+    el.title = new Date(iso).toLocaleString();
+    el.textContent = ago(iso);
+    return el;
   }
 
-  function setFileBusy(busy: boolean) {
-    [fileDownloadBtn, fileDeleteBtn, fileUploadInput].forEach((el) => {
-      (el as HTMLButtonElement | HTMLInputElement).disabled = busy;
+  function refreshTimes() {
+    document.querySelectorAll<HTMLTimeElement>('time[datetime]').forEach((el) => {
+      el.textContent = ago(el.dateTime);
     });
   }
 
@@ -373,365 +408,145 @@ import Layout from '../layouts/Layout.astro';
     return `${value.toFixed(1)} ${units[unitIndex]}`;
   }
 
-  function publicFileUrl(updatedAt: string | null) {
-    const { data } = supabase!.storage.from(FILE_BUCKET).getPublicUrl(FILE_OBJECT_PATH);
-    const bust = updatedAt ? `?t=${encodeURIComponent(updatedAt)}` : '';
-    return `${data.publicUrl}${bust}`;
+  function setMeta(el: HTMLElement, item: Item) {
+    const parts: (string | Node)[] = [`#${item.id} · `, timeEl(item.created_at)];
+    if (item.content_type === 'text') {
+      parts.push(` · ${(item.content ?? '').length.toLocaleString()} chars`);
+    }
+    el.replaceChildren(...parts);
   }
 
-  function render(row: Row) {
-    current = row;
-    const hasContent = row.content_type === 'text' || row.content_type === 'image';
-
-    emptyState.classList.toggle('hidden', hasContent);
-    textView.classList.add('hidden');
-    imageView.classList.add('hidden');
-    actionRow.classList.toggle('hidden', !hasContent);
-
-    if (!hasContent) {
-      emptyState.textContent = 'Nothing here yet — be the first to paste something.';
-      updatedAtEl.textContent = '';
-      return;
-    }
-
-    updatedAtEl.textContent = row.updated_at
-      ? new Date(row.updated_at).toLocaleString()
-      : '';
-
-    if (row.content_type === 'text') {
-      textView.textContent = row.content ?? '';
-      textView.classList.remove('hidden');
-    } else if (row.content_type === 'image') {
-      imageEl.src = publicImageUrl(row.updated_at);
-      imageView.classList.remove('hidden');
-    }
+  function imageUrl(path: string) {
+    return supabase!.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
   }
 
-  async function loadCurrent() {
-    const { data, error } = await supabase!
-      .from('secret_paste')
-      .select('id, content_type, content, image_mime, updated_at')
-      .eq('id', ROW_ID)
-      .single();
+  function findItem(id: number) {
+    return items.text.find((i) => i.id === id) ?? items.image.find((i) => i.id === id) ?? null;
+  }
 
-    if (error) {
-      setStatus(`Couldn't load: ${error.message}`, true);
-      return;
+  function field(root: Element, name: string) {
+    return root.querySelector(`[data-field="${name}"]`) as HTMLElement;
+  }
+
+  // ── Rendering ─────────────────────────────────────────────────────────────
+
+  function renderTexts() {
+    const [latest, ...older] = items.text;
+    textCount.textContent = latest ? `${items.text.length}/${KEEP_PER_KIND}` : '';
+    textEmpty.textContent = 'Nothing yet. Copy something and press Ctrl+V anywhere on this page.';
+    textEmpty.classList.toggle('hidden', Boolean(latest));
+    textLatest.classList.toggle('hidden', !latest);
+
+    if (latest) {
+      textLatest.dataset.itemId = String(latest.id);
+      setMeta(textLatestMeta, latest);
+      textLatestBody.textContent = latest.content ?? '';
     }
-    render(data as Row);
+
+    textList.replaceChildren(
+      ...older.map((item) => {
+        const row = textRowTpl.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
+        row.dataset.itemId = String(item.id);
+        field(row, 'preview').textContent = (item.content ?? '').slice(0, 300) || '(empty)';
+        setMeta(field(row, 'meta'), item);
+        return row;
+      })
+    );
+  }
+
+  function renderShots() {
+    const [latest, ...older] = items.image;
+    shotCount.textContent = latest ? `${items.image.length}/${KEEP_PER_KIND}` : '';
+    shotEmpty.textContent = 'Nothing yet. Take a screenshot and press Ctrl+V anywhere on this page.';
+    shotEmpty.classList.toggle('hidden', Boolean(latest));
+    shotLatest.classList.toggle('hidden', !latest);
+
+    if (latest?.image_path) {
+      const url = imageUrl(latest.image_path);
+      shotLatest.dataset.itemId = String(latest.id);
+      setMeta(shotLatestMeta, latest);
+      shotLatestImg.src = url;
+      shotLatestOpen.href = url;
+    }
+
+    shotList.replaceChildren(
+      ...older
+        .filter((item) => item.image_path)
+        .map((item) => {
+          const tile = shotTileTpl.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
+          tile.dataset.itemId = String(item.id);
+          (field(tile, 'img') as HTMLImageElement).src = imageUrl(item.image_path!);
+          setMeta(field(tile, 'meta'), item);
+          return tile;
+        })
+    );
   }
 
   function renderFile(row: FileRow) {
     currentFile = row;
-    const hasFile = Boolean(row.file_name);
-
-    fileEmptyState.classList.toggle('hidden', hasFile);
-    fileView.classList.toggle('hidden', !hasFile);
-    fileActionRow.classList.toggle('hidden', !hasFile);
-
-    if (!hasFile) {
-      fileEmptyState.textContent = 'Nothing here yet — be the first to upload something.';
-      fileUpdatedAtEl.textContent = '';
-      return;
-    }
+    const hasFile = Boolean(row.file_name && row.file_path);
+    fileEmpty.textContent = 'No file yet.';
+    fileEmpty.classList.toggle('hidden', hasFile);
+    fileCurrent.classList.toggle('hidden', !hasFile);
+    if (!hasFile) return;
 
     fileNameEl.textContent = row.file_name;
-    fileSizeEl.textContent = row.file_size != null ? formatBytes(row.file_size) : '';
-    fileUpdatedAtEl.textContent = row.updated_at
-      ? new Date(row.updated_at).toLocaleString()
-      : '';
+    const parts: (string | Node)[] = [];
+    if (row.file_size != null) parts.push(formatBytes(row.file_size));
+    if (row.updated_at) parts.push(parts.length ? ' · ' : '', timeEl(row.updated_at));
+    fileMetaEl.replaceChildren(...parts);
+    // ?download=<name> makes Storage send Content-Disposition: attachment
+    // with the original file name.
+    fileDownload.href = supabase!.storage
+      .from(FILE_BUCKET)
+      .getPublicUrl(row.file_path!, { download: row.file_name! }).data.publicUrl;
   }
 
-  async function loadCurrentFile() {
+  // ── Loading ───────────────────────────────────────────────────────────────
+
+  async function loadKind(kind: Kind) {
     const { data, error } = await supabase!
-      .from('secret_file')
-      .select('id, file_name, file_mime, file_size, updated_at')
-      .eq('id', ROW_ID)
+      .from(TABLE)
+      .select('id, content_type, content, image_path, image_mime, created_at')
+      .eq('content_type', kind)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(KEEP_PER_KIND);
+
+    if (error) {
+      notify(`Couldn't load ${kind === 'text' ? 'text' : 'screenshots'}: ${error.message}`, true);
+      return;
+    }
+    items[kind] = (data ?? []) as Item[];
+    if (kind === 'text') renderTexts();
+    else renderShots();
+
+    // Close the viewer if what it shows was deleted (here or elsewhere).
+    if (viewer.open && !findItem(Number(viewerPanel.dataset.itemId))) viewer.close();
+  }
+
+  async function loadFile() {
+    const { data, error } = await supabase!
+      .from(FILE_TABLE)
+      .select('file_name, file_mime, file_size, file_path, updated_at')
+      .eq('id', FILE_ROW_ID)
       .single();
 
     if (error) {
-      setFileStatus(`Couldn't load: ${error.message}`, true);
+      fileEmpty.textContent = "Couldn't load the file.";
+      notify(`Couldn't load the file: ${error.message} (${SETUP_HINT})`, true);
       return;
     }
     renderFile(data as FileRow);
   }
 
-  async function uploadFile(file: File) {
-    if (file.size > MAX_FILE_BYTES) {
-      setFileStatus(`Too large — max ${MAX_FILE_BYTES / 1024 / 1024}MB.`, true);
-      return;
-    }
-    setFileBusy(true);
-    setFileStatus('Uploading…');
-
-    const { error: uploadError } = await supabase!.storage
-      .from(FILE_BUCKET)
-      .upload(FILE_OBJECT_PATH, file, {
-        upsert: true,
-        contentType: file.type || 'application/octet-stream',
-      });
-
-    if (uploadError) {
-      setFileBusy(false);
-      setFileStatus(`Upload failed: ${uploadError.message}`, true);
-      return;
-    }
-
-    const { error } = await supabase!
-      .from('secret_file')
-      .update({
-        file_name: file.name,
-        file_mime: file.type || 'application/octet-stream',
-        file_size: file.size,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', ROW_ID);
-
-    setFileBusy(false);
-    if (error) {
-      setFileStatus(`Save failed: ${error.message}`, true);
-      return;
-    }
-    fileUploadInput.value = '';
-    setFileStatus('Uploaded.');
-    await loadCurrentFile();
+  function loadAll() {
+    void loadKind('text');
+    void loadKind('image');
+    void loadFile();
   }
 
-  async function downloadCurrentFile() {
-    if (!currentFile?.file_name) return;
-    setFileBusy(true);
-    setFileStatus('Fetching…');
-    try {
-      const res = await fetch(publicFileUrl(currentFile.updated_at));
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = currentFile.file_name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      setFileStatus('Downloaded.');
-    } catch {
-      setFileStatus('Download failed.', true);
-    }
-    setFileBusy(false);
-  }
-
-  async function clearCurrentFile() {
-    setFileBusy(true);
-    const { error } = await supabase!
-      .from('secret_file')
-      .update({ file_name: null, file_mime: null, file_size: null, updated_at: new Date().toISOString() })
-      .eq('id', ROW_ID);
-    setFileBusy(false);
-    if (error) {
-      setFileStatus(`Delete failed: ${error.message}`, true);
-      return;
-    }
-    setFileStatus('Cleared.');
-    await loadCurrentFile();
-  }
-
-  async function saveText(text: string) {
-    if (!text.trim()) {
-      setStatus('Nothing to save.', true);
-      return;
-    }
-    if (text.length > MAX_TEXT_LENGTH) {
-      setStatus(`Too long — max ${MAX_TEXT_LENGTH.toLocaleString()} characters.`, true);
-      return;
-    }
-    setBusy(true);
-    setStatus('Saving…');
-    const { error } = await supabase!
-      .from('secret_paste')
-      .update({
-        content_type: 'text',
-        content: text,
-        image_mime: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', ROW_ID);
-    setBusy(false);
-    if (error) {
-      setStatus(`Save failed: ${error.message}`, true);
-      return;
-    }
-    textInput.value = '';
-    setStatus('Saved.');
-    await loadCurrent();
-    void insertHistory({ content_type: 'text', content: text });
-  }
-
-  async function saveImage(file: File) {
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      setStatus('Unsupported image type.', true);
-      return;
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      setStatus(`Image too large — max ${MAX_IMAGE_BYTES / 1024 / 1024}MB.`, true);
-      return;
-    }
-    setBusy(true);
-    setStatus('Uploading…');
-
-    const { error: uploadError } = await supabase!.storage
-      .from(BUCKET)
-      .upload(OBJECT_PATH, file, { upsert: true, contentType: file.type });
-
-    if (uploadError) {
-      setBusy(false);
-      setStatus(`Upload failed: ${uploadError.message}`, true);
-      return;
-    }
-
-    const { error } = await supabase!
-      .from('secret_paste')
-      .update({
-        content_type: 'image',
-        content: null,
-        image_mime: file.type,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', ROW_ID);
-
-    setBusy(false);
-    if (error) {
-      setStatus(`Save failed: ${error.message}`, true);
-      return;
-    }
-    fileInput.value = '';
-    setStatus('Saved.');
-    await loadCurrent();
-    void insertHistory({ content_type: 'image', file });
-  }
-
-  async function clearCurrent() {
-    setBusy(true);
-    const { error } = await supabase!
-      .from('secret_paste')
-      .update({ content_type: null, content: null, image_mime: null, updated_at: new Date().toISOString() })
-      .eq('id', ROW_ID);
-    setBusy(false);
-    if (error) {
-      setStatus(`Delete failed: ${error.message}`, true);
-      return;
-    }
-    setStatus('Cleared.');
-    await loadCurrent();
-  }
-
-  async function copyEntry(
-    contentType: 'text' | 'image' | null,
-    text: string | null,
-    imageSrc: string,
-    onStatus: (msg: string, isError?: boolean) => void
-  ) {
-    try {
-      if (contentType === 'text') {
-        await navigator.clipboard.writeText(text ?? '');
-      } else if (contentType === 'image') {
-        const res = await fetch(imageSrc);
-        const blob = await res.blob();
-        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-      }
-      onStatus('Copied.');
-    } catch {
-      onStatus('Copy not supported in this browser — right-click to copy manually.', true);
-    }
-  }
-
-  async function copyCurrent() {
-    if (!current) return;
-    await copyEntry(current.content_type, current.content, imageEl.src, setStatus);
-  }
-
-  function historyImageUrl(path: string) {
-    const { data } = supabase!.storage.from(BUCKET).getPublicUrl(path);
-    return data.publicUrl;
-  }
-
-  function formatHistoryTime(iso: string) {
-    return new Date(iso).toLocaleString();
-  }
-
-  function setHistoryModalStatus(msg: string, isError = false) {
-    historyModalStatus.textContent = msg;
-    historyModalStatus.classList.toggle('text-red-guards', isError);
-    historyModalStatus.classList.toggle('text-text-muted', !isError);
-  }
-
-  function renderHistory() {
-    historyEmpty.classList.toggle('hidden', historyItems.length > 0);
-    historyList.innerHTML = '';
-
-    for (const item of historyItems) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className =
-        'w-full text-left border border-border bg-surface-2 hover:border-text-secondary transition-colors p-2';
-
-      if (item.content_type === 'image' && item.image_path) {
-        const img = document.createElement('img');
-        img.src = historyImageUrl(item.image_path);
-        img.alt = 'Pasted image';
-        img.className = 'w-full h-14 object-cover border border-border';
-        btn.appendChild(img);
-      } else {
-        const preview = document.createElement('span');
-        preview.className = 'block truncate font-mono text-2xs text-text-secondary';
-        preview.textContent = (item.content ?? '').slice(0, 80) || '(empty)';
-        btn.appendChild(preview);
-      }
-
-      const time = document.createElement('span');
-      time.className = 'block font-mono text-2xs text-text-muted mt-1';
-      time.textContent = formatHistoryTime(item.created_at);
-      btn.appendChild(time);
-
-      btn.addEventListener('click', () => openHistoryItem(item));
-
-      const li = document.createElement('li');
-      li.appendChild(btn);
-      historyList.appendChild(li);
-    }
-  }
-
-  async function loadHistory() {
-    const { data, error } = await supabase!
-      .from(HISTORY_TABLE)
-      .select('id, content_type, content, image_path, image_mime, created_at')
-      .order('id', { ascending: false })
-      .limit(HISTORY_LIMIT);
-
-    if (error) {
-      console.error('Could not load history:', error.message);
-      return;
-    }
-    historyItems = (data ?? []) as HistoryRow[];
-    renderHistory();
-  }
-
-  function openHistoryItem(item: HistoryRow) {
-    activeHistoryItem = item;
-    setHistoryModalStatus('');
-    historyModalTime.textContent = formatHistoryTime(item.created_at);
-
-    historyModalText.classList.add('hidden');
-    historyModalImage.classList.add('hidden');
-
-    if (item.content_type === 'text') {
-      historyModalText.textContent = item.content ?? '';
-      historyModalText.classList.remove('hidden');
-    } else if (item.content_type === 'image' && item.image_path) {
-      historyModalImageEl.src = historyImageUrl(item.image_path);
-      historyModalImage.classList.remove('hidden');
-    }
-
-    historyModal.showModal();
-  }
+  // ── Saving text and screenshots ───────────────────────────────────────────
 
   // Best-effort heuristic: Supabase doesn't reliably document exact wording
   // for a project-wide storage/DB quota error, so this matches on common
@@ -748,59 +563,20 @@ import Layout from '../layouts/Layout.astro';
     return ['storage', 'quota', 'limit', 'insufficient', 'full'].some((kw) => message.includes(kw));
   }
 
-  // Storage object removed before the DB row: if the row delete then fails,
-  // the result is a harmless dangling row that self-heals on the next
-  // prune pass, rather than a row pointing at a now-missing image.
-  async function evictOldestHistoryItem(): Promise<boolean> {
-    const { data, error } = await supabase!
-      .from(HISTORY_TABLE)
-      .select('id, image_path')
-      .order('id', { ascending: true })
-      .limit(1);
+  type NewEntry = { content_type: 'text'; content: string } | { content_type: 'image'; file: File };
 
-    if (error || !data || data.length === 0) return false;
-
-    const oldest = data[0] as { id: number; image_path: string | null };
-    if (oldest.image_path) {
-      await supabase!.storage.from(BUCKET).remove([oldest.image_path]);
-    }
-    await supabase!.from(HISTORY_TABLE).delete().eq('id', oldest.id);
-    return true;
-  }
-
-  async function pruneHistoryToLimit() {
-    const { data, error } = await supabase!
-      .from(HISTORY_TABLE)
-      .select('id, image_path')
-      .order('id', { ascending: false });
-
-    if (error || !data) return;
-
-    const excess = data.slice(HISTORY_LIMIT) as { id: number; image_path: string | null }[];
-    for (const row of excess) {
-      if (row.image_path) {
-        await supabase!.storage.from(BUCKET).remove([row.image_path]);
-      }
-      await supabase!.from(HISTORY_TABLE).delete().eq('id', row.id);
-    }
-  }
-
-  type HistoryEntry =
-    | { content_type: 'text'; content: string }
-    | { content_type: 'image'; file: File };
-
-  async function tryInsertOnce(entry: HistoryEntry): Promise<{ ok: true } | { ok: false; error: unknown }> {
+  async function insertOnce(entry: NewEntry): Promise<unknown | null> {
     let imagePath: string | null = null;
 
     if (entry.content_type === 'image') {
-      imagePath = `${HISTORY_IMAGE_PREFIX}${crypto.randomUUID()}`;
+      imagePath = `${IMAGE_PREFIX}${crypto.randomUUID()}`;
       const { error: uploadError } = await supabase!.storage
-        .from(BUCKET)
+        .from(IMAGE_BUCKET)
         .upload(imagePath, entry.file, { contentType: entry.file.type });
-      if (uploadError) return { ok: false, error: uploadError };
+      if (uploadError) return uploadError;
     }
 
-    const { error: insertError } = await supabase!.from(HISTORY_TABLE).insert({
+    const { error: insertError } = await supabase!.from(TABLE).insert({
       content_type: entry.content_type,
       content: entry.content_type === 'text' ? entry.content : null,
       image_path: imagePath,
@@ -808,146 +584,420 @@ import Layout from '../layouts/Layout.astro';
     });
 
     if (insertError) {
-      // Upload already succeeded — without this, the object would orphan
-      // permanently, since pruning only ever looks at DB rows to decide
-      // what to delete from storage.
-      if (imagePath) {
-        await supabase!.storage.from(BUCKET).remove([imagePath]);
-      }
-      return { ok: false, error: insertError };
+      // The upload already succeeded. Without this the object would orphan
+      // permanently, since pruning only looks at rows to decide what to
+      // delete from storage.
+      if (imagePath) await supabase!.storage.from(IMAGE_BUCKET).remove([imagePath]);
+      return insertError;
     }
-
-    return { ok: true };
+    return null;
   }
 
-  // Bounded retry: up to HISTORY_LIMIT insert attempts, evicting the single
-  // oldest history item between failed attempts when the failure looks
-  // capacity-related, stopping early if history runs out first. The
-  // paste itself (secret_paste) has already been saved by the time this
-  // runs, so a failure here never loses the user's actual paste — only
-  // the history log entry can fail to record. Errors are swallowed here
-  // deliberately; this must never throw into saveText/saveImage.
-  async function insertHistory(entry: HistoryEntry) {
+  // Storage object removed before the row: if the row delete then fails,
+  // the result is a dangling row that the next prune pass cleans up, rather
+  // than an object nothing points at any more.
+  async function removeRows(rows: { id: number; image_path: string | null }[]) {
+    const paths = rows.map((r) => r.image_path).filter((p): p is string => Boolean(p));
+    if (paths.length) {
+      const { error } = await supabase!.storage.from(IMAGE_BUCKET).remove(paths);
+      if (error) return error;
+    }
+    const { error } = await supabase!
+      .from(TABLE)
+      .delete()
+      .in('id', rows.map((r) => r.id));
+    return error;
+  }
+
+  async function evictOldest(kind: Kind): Promise<boolean> {
+    const { data, error } = await supabase!
+      .from(TABLE)
+      .select('id, image_path')
+      .eq('content_type', kind)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .limit(1);
+    if (error || !data?.length) return false;
+    return !(await removeRows(data));
+  }
+
+  async function pruneKind(kind: Kind) {
+    const { data, error } = await supabase!
+      .from(TABLE)
+      .select('id, image_path')
+      .eq('content_type', kind)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .range(KEEP_PER_KIND, KEEP_PER_KIND + 99);
+    if (error || !data?.length) return;
+    await removeRows(data);
+  }
+
+  // The insert is the save, so a failure here is shown, never swallowed.
+  // Capacity-looking failures evict the oldest entry of the same kind and
+  // retry, a bounded number of times.
+  async function insertEntry(entry: NewEntry): Promise<boolean> {
+    for (let attempt = 1; ; attempt++) {
+      const error = await insertOnce(entry);
+      if (!error) break;
+      const evicted =
+        attempt < KEEP_PER_KIND && isQuotaLikeError(error) && (await evictOldest(entry.content_type));
+      if (!evicted) {
+        notify(`Save failed: ${errorMessage(error)}`, true);
+        return false;
+      }
+    }
+    await pruneKind(entry.content_type);
+    await loadKind(entry.content_type);
+    return true;
+  }
+
+  async function saveText(text: string): Promise<boolean> {
+    if (!text.trim()) {
+      notify('Nothing to save.', true);
+      return false;
+    }
+    if (text.length > MAX_TEXT_LENGTH) {
+      notify(`Too long — max ${MAX_TEXT_LENGTH.toLocaleString()} characters.`, true);
+      return false;
+    }
+
+    // Pasting something that's already in the list moves it to the top
+    // instead of adding a duplicate.
+    const existing = items.text.find((i) => i.content === text);
+    if (existing === items.text[0] && existing) {
+      notify('Already the latest text.');
+      return true;
+    }
+    if (existing && (await bumpItem(existing))) return true;
+
+    notify('Saving…');
+    const saved = await insertEntry({ content_type: 'text', content: text });
+    if (saved) notify(`Saved text (${text.length.toLocaleString()} chars).`);
+    return saved;
+  }
+
+  async function saveComposer() {
+    const value = textInput.value;
+    // Only clear if nothing new was typed while the save was in flight.
+    if ((await saveText(value)) && textInput.value === value) textInput.value = '';
+  }
+
+  async function saveImage(file: File) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      notify(`Unsupported image type: ${file.type || 'unknown'}.`, true);
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      notify(`Screenshot is ${formatBytes(file.size)} — max ${formatBytes(MAX_IMAGE_BYTES)}.`, true);
+      return;
+    }
+    notify('Uploading screenshot…');
+    if (await insertEntry({ content_type: 'image', file })) notify('Screenshot saved.');
+  }
+
+  // Images become screenshots; anything else goes to the file slot.
+  function handleIncomingFile(file: File) {
+    if (ALLOWED_IMAGE_TYPES.includes(file.type)) void saveImage(file);
+    else void uploadFile(file);
+  }
+
+  // ── Item actions (copy, make latest, delete) ──────────────────────────────
+
+  // Browsers only reliably accept image/png on the clipboard, so other
+  // formats are redrawn as PNG first.
+  async function copyImage(url: string) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    let blob = await res.blob();
+    if (blob.type !== 'image/png') {
+      const bitmap = await createImageBitmap(blob);
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
+      blob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG conversion failed'))), 'image/png')
+      );
+    }
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+  }
+
+  async function copyItem(item: Item) {
     try {
-      for (let attempt = 1; attempt <= HISTORY_LIMIT; attempt++) {
-        const result = await tryInsertOnce(entry);
-        if (result.ok) {
-          await pruneHistoryToLimit();
-          await loadHistory();
-          return;
-        }
-        if (attempt === HISTORY_LIMIT || !isQuotaLikeError(result.error)) {
-          throw result.error;
-        }
-        const evicted = await evictOldestHistoryItem();
-        if (!evicted) throw result.error;
-      }
-    } catch (err) {
-      console.error('History append failed:', err);
+      if (item.content_type === 'text') await navigator.clipboard.writeText(item.content ?? '');
+      else await copyImage(imageUrl(item.image_path!));
+      notify('Copied.');
+    } catch {
+      notify("Couldn't copy in this browser — right-click to copy manually.", true);
     }
   }
 
-  saveTextBtn.addEventListener('click', () => saveText(textInput.value));
-  deleteBtn.addEventListener('click', clearCurrent);
-  copyBtn.addEventListener('click', copyCurrent);
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files?.[0];
-    if (file) saveImage(file);
+  async function bumpItem(item: Item): Promise<boolean> {
+    const { error } = await supabase!.rpc('clip_bump', { item_id: item.id });
+    if (error) {
+      notify(`Couldn't move it to the top: ${error.message} (${SETUP_HINT})`, true);
+      return false;
+    }
+    if (viewer.open) viewer.close();
+    notify(`#${item.id} is the latest ${item.content_type === 'text' ? 'text' : 'screenshot'} again.`);
+    await loadKind(item.content_type);
+    return true;
+  }
+
+  async function deleteItem(item: Item) {
+    const error = await removeRows([item]);
+    if (error) {
+      notify(`Delete failed: ${errorMessage(error)}`, true);
+      return;
+    }
+    if (viewer.open) viewer.close();
+    notify(`Deleted #${item.id}.`);
+    await loadKind(item.content_type);
+  }
+
+  function openViewer(item: Item) {
+    const isText = item.content_type === 'text';
+    viewerPanel.dataset.itemId = String(item.id);
+    viewerStatus.textContent = '';
+    setMeta(viewerMeta, item);
+    viewerText.classList.toggle('hidden', !isText);
+    viewerImg.classList.toggle('hidden', isText);
+    // The hidden attribute, not the class: these buttons are inline-flex,
+    // and preflight's [hidden] rule beats that regardless of class order.
+    viewerOpen.hidden = isText;
+    viewerBump.hidden = items[item.content_type][0]?.id === item.id;
+
+    if (isText) {
+      viewerText.textContent = item.content ?? '';
+    } else {
+      const url = imageUrl(item.image_path!);
+      viewerImg.src = url;
+      viewerOpen.href = url;
+    }
+    if (!viewer.open) viewer.showModal();
+  }
+
+  // One listener for every [data-action] button: the latest blocks, list
+  // rows, tiles, and the viewer all carry data-item-id on an ancestor.
+  document.addEventListener('click', (e) => {
+    const button = (e.target as Element).closest<HTMLElement>('[data-action]');
+    const holder = button?.closest<HTMLElement>('[data-item-id]');
+    const item = holder ? findItem(Number(holder.dataset.itemId)) : null;
+    if (!button || !item) return;
+
+    const action = button.dataset.action;
+    if (action === 'view') openViewer(item);
+    else if (action === 'copy') void copyItem(item);
+    else if (action === 'bump') void bumpItem(item);
+    else if (action === 'delete') void deleteItem(item);
   });
 
-  // Paste an image directly into the textarea with Ctrl/Cmd+V.
-  textInput.addEventListener('paste', (e: ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        e.preventDefault();
-        const file = item.getAsFile();
-        if (file) saveImage(file);
+  // ── File slot ─────────────────────────────────────────────────────────────
+
+  // Storage keys reject some characters, so the stored name is a cleaned
+  // copy; the original name lives in the row and is used for downloads.
+  function safeFileName(name: string) {
+    const cleaned = name
+      .normalize('NFKD')
+      .replace(/[^\w.-]+/g, '_')
+      .replace(/^[_.]+|_+$/g, '');
+    return cleaned.slice(-120) || 'file';
+  }
+
+  async function uploadFile(file: File) {
+    if (file.size > MAX_FILE_BYTES) {
+      notify(`${file.name} is ${formatBytes(file.size)} — max ${formatBytes(MAX_FILE_BYTES)}.`, true);
+      return;
+    }
+    if (uploadingFile) {
+      notify('Still uploading the previous file.', true);
+      return;
+    }
+    uploadingFile = true;
+    notify(`Uploading ${file.name}…`);
+
+    try {
+      const path = `${crypto.randomUUID()}/${safeFileName(file.name)}`;
+      const mime = file.type || 'application/octet-stream';
+      const { error: uploadError } = await supabase!.storage
+        .from(FILE_BUCKET)
+        .upload(path, file, { contentType: mime });
+      if (uploadError) {
+        notify(`Upload failed: ${uploadError.message}`, true);
         return;
       }
+
+      const previousPath = currentFile?.file_path ?? null;
+      const { error } = await supabase!
+        .from(FILE_TABLE)
+        .update({
+          file_name: file.name,
+          file_mime: mime,
+          file_size: file.size,
+          file_path: path,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', FILE_ROW_ID);
+
+      if (error) {
+        await supabase!.storage.from(FILE_BUCKET).remove([path]);
+        notify(`Save failed: ${error.message} (${SETUP_HINT})`, true);
+        return;
+      }
+      if (previousPath && previousPath !== path) {
+        await supabase!.storage.from(FILE_BUCKET).remove([previousPath]);
+      }
+      notify(`Uploaded ${file.name}.`);
+      await loadFile();
+    } finally {
+      uploadingFile = false;
+      fileInput.value = '';
+    }
+  }
+
+  async function deleteFile() {
+    const path = currentFile?.file_path;
+    if (!path) return;
+
+    const { data: removed, error: removeError } = await supabase!.storage
+      .from(FILE_BUCKET)
+      .remove([path]);
+    if (removeError) {
+      notify(`Delete failed: ${removeError.message}`, true);
+      return;
+    }
+
+    const { error } = await supabase!
+      .from(FILE_TABLE)
+      .update({
+        file_name: null,
+        file_mime: null,
+        file_size: null,
+        file_path: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', FILE_ROW_ID);
+    if (error) {
+      notify(`Delete failed: ${error.message}`, true);
+      return;
+    }
+
+    // Storage reports what it actually deleted; RLS blocks fail silently.
+    if (removed?.length) notify('File deleted.');
+    else notify(`Cleared, but the stored copy may still be downloadable (${SETUP_HINT})`, true);
+    await loadFile();
+  }
+
+  // ── Wiring ────────────────────────────────────────────────────────────────
+
+  saveTextBtn.addEventListener('click', () => void saveComposer());
+  textInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      void saveComposer();
     }
   });
 
-  historyModalCopyBtn.addEventListener('click', () => {
-    if (!activeHistoryItem) return;
-    copyEntry(
-      activeHistoryItem.content_type,
-      activeHistoryItem.content,
-      historyModalImageEl.src,
-      setHistoryModalStatus
+  shotInput.addEventListener('change', () => {
+    const file = shotInput.files?.[0];
+    shotInput.value = '';
+    if (file) void saveImage(file);
+  });
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files?.[0];
+    if (file) void uploadFile(file);
+  });
+  fileDeleteBtn.addEventListener('click', () => void deleteFile());
+
+  // Ctrl+V anywhere on the page saves straight away. Inside the text box it
+  // pastes normally (so it can be edited first), except for images.
+  document.addEventListener('paste', (e: ClipboardEvent) => {
+    if (!supabaseConfigured || viewer.open) return;
+    const target = e.target as HTMLElement;
+    const inComposer = target === textInput;
+    if (!inComposer && target.closest('input, textarea, select, [contenteditable]')) return;
+
+    const data = e.clipboardData;
+    if (!data) return;
+    const text = data.getData('text/plain');
+    const file = Array.from(data.items).find((i) => i.kind === 'file')?.getAsFile() ?? null;
+
+    // Text wins when both are present: Excel and Word put a picture of the
+    // copied cells on the clipboard alongside the text.
+    if (inComposer) {
+      if (!text && file) {
+        e.preventDefault();
+        handleIncomingFile(file);
+      }
+      return;
+    }
+    if (text.trim()) {
+      e.preventDefault();
+      void saveText(text);
+    } else if (file) {
+      e.preventDefault();
+      handleIncomingFile(file);
+    }
+  });
+
+  // Dropping files anywhere works like pasting them; dropping onto the file
+  // box always uses the file slot, even for images.
+  document.addEventListener('dragover', (e: DragEvent) => {
+    if (!e.dataTransfer?.types.includes('Files')) return;
+    e.preventDefault();
+    fileDropZone.classList.toggle(
+      'border-red-guards-dim',
+      fileDropZone.contains(e.target as Node)
     );
   });
-  historyModal.querySelector('[data-close-modal]')?.addEventListener('click', () => historyModal.close());
-  historyModal.addEventListener('click', (e) => {
-    if (e.target === historyModal) historyModal.close();
-  });
-
-  fileDownloadBtn.addEventListener('click', downloadCurrentFile);
-  fileDeleteBtn.addEventListener('click', clearCurrentFile);
-  fileUploadInput.addEventListener('change', () => {
-    const file = fileUploadInput.files?.[0];
-    if (file) uploadFile(file);
-  });
-
-  // Drag-and-drop onto the upload box.
-  fileDropZone.addEventListener('dragover', (e: DragEvent) => {
-    e.preventDefault();
-    fileDropZone.classList.add('border-red-guards-dim');
-  });
-  fileDropZone.addEventListener('dragleave', () => {
-    fileDropZone.classList.remove('border-red-guards-dim');
-  });
-  fileDropZone.addEventListener('drop', (e: DragEvent) => {
-    e.preventDefault();
-    fileDropZone.classList.remove('border-red-guards-dim');
+  document.addEventListener('dragleave', () => fileDropZone.classList.remove('border-red-guards-dim'));
+  document.addEventListener('drop', (e: DragEvent) => {
     const file = e.dataTransfer?.files?.[0];
-    if (file) uploadFile(file);
+    fileDropZone.classList.remove('border-red-guards-dim');
+    if (!file || !supabaseConfigured) return;
+    e.preventDefault();
+    if (fileDropZone.contains(e.target as Node)) void uploadFile(file);
+    else handleIncomingFile(file);
+  });
+
+  $('viewer-close').addEventListener('click', () => viewer.close());
+  viewer.addEventListener('click', (e) => {
+    if (e.target === viewer) viewer.close();
   });
 
   if (!supabaseConfigured) {
     configWarning.classList.remove('hidden');
-    emptyState.textContent = 'Not configured.';
-    fileEmptyState.textContent = 'Not configured.';
-    historyEmpty.textContent = 'Not configured.';
+    for (const el of [textEmpty, shotEmpty, fileEmpty]) el.textContent = 'Not configured.';
   } else {
-    loadCurrent();
-    loadCurrentFile();
-    loadHistory();
+    loadAll();
+    window.setInterval(refreshTimes, 30_000);
 
-    // Live updates when someone else changes the paste. Re-fetch rather than
-    // trusting payload.new: Postgres NOTIFY (which postgres_changes relies
-    // on) caps payloads at 8000 bytes and silently drops larger fields, so
-    // big pastes would show up empty/stale on other tabs otherwise.
+    // A tab left open on the other PC can miss realtime events while the
+    // machine sleeps, so catch up whenever it comes back into view.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') loadAll();
+    });
+
+    // Live updates from other tabs and PCs. Re-fetch rather than trusting
+    // payload.new: Postgres NOTIFY (which postgres_changes relies on) caps
+    // payloads at 8000 bytes and silently drops larger fields. Debounced
+    // because one save fires an insert plus a few prune deletes.
+    let reloadTimer: number | undefined;
     supabase!
-      .channel('secret_paste_changes')
+      .channel('clipboard_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, () => {
+        window.clearTimeout(reloadTimer);
+        reloadTimer = window.setTimeout(() => {
+          void loadKind('text');
+          void loadKind('image');
+        }, 200);
+      })
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'secret_paste', filter: `id=eq.${ROW_ID}` },
-        () => loadCurrent()
-      )
-      .subscribe();
-
-    // Live updates when someone else changes the uploaded file.
-    supabase!
-      .channel('secret_file_changes')
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'secret_file', filter: `id=eq.${ROW_ID}` },
-        (payload) => renderFile(payload.new as FileRow)
-      )
-      .subscribe();
-
-    // Live updates when someone else adds to or prunes history. Always
-    // re-fetch (same reasoning as above) rather than trusting the payload —
-    // also simpler here since inserts and deletes both just mean "re-fetch
-    // the last 5," so one '*' listener covers both.
-    supabase!
-      .channel('paste_history_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'paste_history' },
-        () => loadHistory()
+        { event: 'UPDATE', schema: 'public', table: FILE_TABLE, filter: `id=eq.${FILE_ROW_ID}` },
+        () => void loadFile()
       )
       .subscribe();
   }
