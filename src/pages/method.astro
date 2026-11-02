@@ -86,6 +86,7 @@ const kbd = 'px-1 border border-border text-text-secondary';
             <pre
               id="text-latest-body"
               class="whitespace-pre-wrap break-words font-mono text-sm text-text-primary bg-surface-2 border border-border p-3 max-h-80 overflow-auto"></pre>
+            <p id="text-latest-truncated" hidden class={`${meta} mt-2`}></p>
           </div>
 
           <p id="text-empty" class="px-4 py-8 text-center text-sm text-text-muted">Loading…</p>
@@ -190,6 +191,7 @@ const kbd = 'px-1 border border-border text-text-secondary';
         <pre
           id="viewer-text"
           class="hidden whitespace-pre-wrap break-words font-mono text-sm text-text-primary bg-surface-2 border border-border p-4"></pre>
+        <p id="viewer-truncated" hidden class={`${meta} mt-3`}></p>
         <img id="viewer-img" alt="Screenshot" class="hidden max-w-full mx-auto border border-border" />
       </div>
 
@@ -261,7 +263,7 @@ const kbd = 'px-1 border border-border text-text-secondary';
 
 <script>
   import { supabase, supabaseConfigured } from '../lib/supabase';
-  import { KEEP_PER_KIND } from '../lib/clipboardApi';
+  import { KEEP_PER_KIND, clipTextUrl } from '../lib/clipboardApi';
 
   const TABLE = 'paste_history';
   const IMAGE_BUCKET = 'secret-uploads';
@@ -274,6 +276,11 @@ const kbd = 'px-1 border border-border text-text-secondary';
   const MAX_FILE_BYTES = 50 * 1024 * 1024;
   const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
   const SETUP_HINT = 'has supabase/clipboard_v2_setup.sql been run?';
+  // How much of a text the page puts on screen. Laying out a 1.3M-character
+  // paste froze the tab for about a second. Copy always copies the whole
+  // text, and the viewer's Open link shows all of it in a new tab.
+  const LATEST_PREVIEW_CHARS = 10_000;
+  const VIEWER_PREVIEW_CHARS = 50_000;
 
   type Kind = 'text' | 'image';
 
@@ -305,6 +312,7 @@ const kbd = 'px-1 border border-border text-text-secondary';
   const textLatest = $('text-latest');
   const textLatestMeta = $('text-latest-meta');
   const textLatestBody = $('text-latest-body');
+  const textLatestTruncated = $('text-latest-truncated');
   const textEmpty = $('text-empty');
   const textList = $<HTMLOListElement>('text-list');
   const textRowTpl = $<HTMLTemplateElement>('text-row-tpl');
@@ -332,12 +340,20 @@ const kbd = 'px-1 border border-border text-text-secondary';
   const viewerPanel = $('viewer-panel');
   const viewerMeta = $('viewer-meta');
   const viewerText = $('viewer-text');
+  const viewerTruncated = $('viewer-truncated');
   const viewerImg = $<HTMLImageElement>('viewer-img');
   const viewerOpen = $<HTMLAnchorElement>('viewer-open');
   const viewerBump = $<HTMLButtonElement>('viewer-bump');
   const viewerStatus = $('viewer-status');
 
   const items: Record<Kind, Item[]> = { text: [], image: [] };
+  // What each list was last rendered from (ids and timestamps), so reloads
+  // that find nothing new leave the page alone.
+  const renderedFrom: Record<Kind, string | null> = { text: null, image: null };
+  // Text bodies by id. Saved content never changes (anon can only update
+  // created_at), so each text is downloaded once and reloads fetch only
+  // the list.
+  const textBodies = new Map<number, string>();
   let currentFile: FileRow | null = null;
   let uploadingFile = false;
 
@@ -440,7 +456,12 @@ const kbd = 'px-1 border border-border text-text-secondary';
     if (latest) {
       textLatest.dataset.itemId = String(latest.id);
       setMeta(textLatestMeta, latest);
-      textLatestBody.textContent = latest.content ?? '';
+      const content = latest.content ?? '';
+      textLatestBody.textContent = content.slice(0, LATEST_PREVIEW_CHARS);
+      textLatestTruncated.hidden = content.length <= LATEST_PREVIEW_CHARS;
+      textLatestTruncated.textContent =
+        `Showing the first ${LATEST_PREVIEW_CHARS.toLocaleString()} of ` +
+        `${content.length.toLocaleString()} characters. Copy copies all of it.`;
     }
 
     textList.replaceChildren(
@@ -505,21 +526,48 @@ const kbd = 'px-1 border border-border text-text-secondary';
   // ── Loading ───────────────────────────────────────────────────────────────
 
   async function loadKind(kind: Kind) {
+    const label = kind === 'text' ? 'text' : 'screenshots';
     const { data, error } = await supabase!
       .from(TABLE)
-      .select('id, content_type, content, image_path, image_mime, created_at')
+      .select('id, content_type, image_path, image_mime, created_at')
       .eq('content_type', kind)
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
       .limit(KEEP_PER_KIND);
 
     if (error) {
-      notify(`Couldn't load ${kind === 'text' ? 'text' : 'screenshots'}: ${error.message}`, true);
+      notify(`Couldn't load ${label}: ${error.message}`, true);
       return;
     }
-    items[kind] = (data ?? []) as Item[];
-    if (kind === 'text') renderTexts();
-    else renderShots();
+    let rows = (data ?? []).map((row) => ({ ...row, content: null }) as Item);
+
+    if (kind === 'text') {
+      const missing = rows.filter((r) => !textBodies.has(r.id)).map((r) => r.id);
+      if (missing.length) {
+        const { data: bodies, error: bodyError } = await supabase!
+          .from(TABLE)
+          .select('id, content')
+          .in('id', missing);
+        if (bodyError) {
+          notify(`Couldn't load ${label}: ${bodyError.message}`, true);
+          return;
+        }
+        for (const b of bodies ?? []) textBodies.set(b.id, b.content ?? '');
+      }
+      // A row deleted between the two queries has no body; skip it.
+      rows = rows.filter((r) => textBodies.has(r.id));
+      for (const r of rows) r.content = textBodies.get(r.id)!;
+      const keep = new Set(rows.map((r) => r.id));
+      for (const id of textBodies.keys()) if (!keep.has(id)) textBodies.delete(id);
+    }
+
+    items[kind] = rows;
+    const signature = rows.map((r) => `${r.id}@${r.created_at}`).join(',');
+    if (signature !== renderedFrom[kind]) {
+      renderedFrom[kind] = signature;
+      if (kind === 'text') renderTexts();
+      else renderShots();
+    }
 
     // Close the viewer if what it shows was deleted (here or elsewhere).
     if (viewer.open && !findItem(Number(viewerPanel.dataset.itemId))) viewer.close();
@@ -765,11 +813,19 @@ const kbd = 'px-1 border border-border text-text-secondary';
     viewerImg.classList.toggle('hidden', isText);
     // The hidden attribute, not the class: these buttons are inline-flex,
     // and preflight's [hidden] rule beats that regardless of class order.
-    viewerOpen.hidden = isText;
+    const content = item.content ?? '';
+    const truncated = isText && content.length > VIEWER_PREVIEW_CHARS;
+    viewerOpen.hidden = isText && !truncated;
+    viewerTruncated.hidden = !truncated;
     viewerBump.hidden = items[item.content_type][0]?.id === item.id;
 
     if (isText) {
-      viewerText.textContent = item.content ?? '';
+      viewerText.textContent = content.slice(0, VIEWER_PREVIEW_CHARS);
+      viewerTruncated.textContent =
+        `Showing the first ${VIEWER_PREVIEW_CHARS.toLocaleString()} of ` +
+        `${content.length.toLocaleString()} characters. Copy copies all of it; ` +
+        'Open shows all of it in a new tab.';
+      viewerOpen.href = clipTextUrl(item.id);
     } else {
       const url = imageUrl(item.image_path!);
       viewerImg.src = url;

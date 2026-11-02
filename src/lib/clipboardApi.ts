@@ -20,6 +20,11 @@ function rpc(name: string) {
   return `${supabaseUrl}/rest/v1/rpc/${name}?apikey=${anonKey}`;
 }
 
+// One text as raw text/plain, which a browser tab shows as-is.
+export function clipTextUrl(id: number) {
+  return `${rpc('clip_text')}&id=${id}`;
+}
+
 export const clipboardEndpoints: Endpoint[] =
   supabaseUrl && anonKey
     ? [
